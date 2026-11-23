@@ -1,3 +1,13 @@
+# NOTE: `name` must match the project name shown in your Cloudflare dashboard.
 name = "brauatelier"
+main = "src/worker.js"
 compatibility_date = "2024-11-01"
-pages_build_output_dir = "public"
+
+# Serves the website (public/index.html etc.). /api/generate is handled by the Worker.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Cloudflare Workers AI (FLUX image model). No API key needed.
+[ai]
+binding = "AI"

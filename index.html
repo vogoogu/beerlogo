@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>Brauatelier – design your own beer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍺%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#FBE9D2; --paper2:#F5DABB; --ink:#2A1A14; --muted:#6E5648;
+  --ember:#E8501F; --gold:#F0A91C; --hop:#11704A; --card:#FFF6E8; --line:#2A1A14;
+  --display:'Archivo','Arial Narrow',Impact,sans-serif;
+  --body:'Work Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;overflow-x:hidden}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--ember);outline-offset:3px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(16px,3vw,40px)}
+
+/* header */
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:2px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-weight:900;font-stretch:112%;font-size:22px;letter-spacing:-.01em}
+.brand svg{width:34px;height:34px}
+nav.main{display:flex;align-items:center;gap:clamp(12px,2.4vw,32px)}
+nav.main a.link{text-decoration:none;font-weight:500;padding:6px 0;border-bottom:2px solid transparent}
+nav.main a.link:hover,nav.main a.link[aria-current="page"]{border-bottom-color:var(--ember)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--line);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:999px;font-weight:600;cursor:pointer;text-decoration:none;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ember{background:var(--ember);border-color:var(--ember);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.sm{padding:8px 16px;font-size:14px}
+
+/* hero */
+.hero{--mega:clamp(34px,9.6vw,150px);padding-top:clamp(24px,4vw,56px);position:relative}
+.mega{font-family:var(--display);font-weight:900;font-stretch:118%;text-transform:uppercase;font-size:var(--mega);line-height:.86;letter-spacing:-.025em;text-align:center;margin:0}
+.mega span{display:block}
+.stage-hero{display:grid;grid-template-columns:1fr minmax(280px,420px) 1fr;gap:24px;align-items:end;margin-top:calc(var(--mega) * -0.72);position:relative;z-index:2}
+.hero-can{display:flex;justify-content:center;transform:rotate(-8deg);filter:drop-shadow(0 28px 22px rgba(42,26,20,.28));animation:drop .9s cubic-bezier(.2,.9,.3,1.1) both}
+.hero-can svg{height:clamp(320px,48vw,580px);width:auto}
+@keyframes drop{from{transform:translateY(-60px) rotate(-22deg);opacity:0}to{transform:rotate(-8deg);opacity:1}}
+.hero-left{padding-bottom:40px;max-width:340px}
+.hero-left p{font-size:17px;margin:0 0 20px}
+.hero-right{padding-bottom:40px;justify-self:end;width:100%;max-width:340px}
+.batch-card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px}
+.batch-card h3{margin:0 0 2px;font-family:var(--display);font-stretch:112%;font-weight:800;font-size:22px}
+.batch-card .sub{color:var(--muted);font-size:14px;margin:0 0 12px}
+.crates{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin:10px 0}
+.crates i{aspect-ratio:1;border:1.5px solid var(--line);border-radius:2px;opacity:.35}
+.crates i.on{background:var(--ember);border-color:var(--ember);opacity:1}
+.crates i.mine{background:var(--hop);border-color:var(--hop);opacity:1}
+.batch-card .meta{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
+
+/* sections */
+section.block{padding:clamp(56px,8vw,110px) 0;border-top:2px solid var(--line);margin-top:clamp(24px,4vw,60px)}
+h2.big{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:clamp(34px,5.4vw,76px);line-height:.95;letter-spacing:-.02em;margin:0 0 14px;text-transform:uppercase;max-width:14ch}
+.lead{font-size:18px;color:var(--muted);max-width:56ch;margin:0 0 40px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:2px solid var(--line);border-radius:18px;overflow:hidden}
+.facts div{padding:28px;border-right:2px solid var(--line)}
+.facts div:last-child{border-right:0}
+.facts b{display:block;font-family:var(--display);font-weight:900;font-stretch:112%;font-size:clamp(44px,6vw,84px);line-height:1}
+.facts span{display:block;margin-top:6px;color:var(--muted)}
+.process{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative}
+.process::before{content:"";position:absolute;left:8%;right:8%;top:96px;height:14px;background:var(--gold);border-radius:8px;opacity:.55}
+.step-tank{position:relative;text-align:left}
+.step-tank svg{width:100%;max-width:170px;display:block;margin:0 auto 12px}
+.pill{display:inline-flex;gap:8px;align-items:center;background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 14px 6px 8px;font-weight:600;font-size:14px}
+.pill em{font-style:normal;background:var(--gold);color:#2A1A14;border-radius:50%;width:22px;height:22px;display:grid;place-items:center;font-size:12px;font-weight:800}
+.step-tank p{margin:10px 0 0;color:var(--muted);font-size:15px}
+
+/* slots */
+.page-head{padding:clamp(32px,5vw,64px) 0 28px}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.slot{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:6px}
+.slot.sel{outline:5px solid var(--ember);outline-offset:-1px}
+.slot h3{margin:0;font-family:var(--display);font-weight:900;font-stretch:112%;font-size:34px;letter-spacing:-.01em}
+.slot .note{color:var(--muted);margin:0}
+.slot dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:8px 0;font-size:14px}
+.slot dt{color:var(--muted)}
+.slot dd{margin:0;font-weight:600}
+.slot .btn{margin-top:auto}
+.togo{font-weight:700;color:var(--ember);font-size:14px}
+
+/* studio */
+.studio{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,520px);gap:clamp(20px,4vw,56px);padding:clamp(24px,4vw,48px) 0 80px;align-items:start}
+.steps{list-style:none;margin:0 0 24px;padding:0;display:flex;gap:8px;flex-wrap:wrap}
+.steps button{border:2px solid var(--line);background:transparent;border-radius:999px;padding:8px 16px;font-weight:600;cursor:pointer}
+.steps button[aria-current="step"]{background:var(--ink);color:var(--paper)}
+.panel h2{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:clamp(30px,4vw,52px);line-height:1;margin:0 0 8px;letter-spacing:-.02em}
+.panel .lead{font-size:16px;margin-bottom:24px}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:1fr auto;gap:2px 16px;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;width:100%}
+.opt[aria-pressed="true"]{outline:4px solid var(--ember);outline-offset:-1px}
+.opt b{font-family:var(--display);font-stretch:112%;font-weight:800;font-size:20px}
+.opt small{color:var(--muted);font-size:14px}
+.opt .r{grid-row:1 / span 2;grid-column:2;text-align:right;font-weight:600;font-size:14px;align-self:center}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 28px}
+.chip{border:2px solid var(--line);background:transparent;border-radius:999px;padding:6px 14px;min-height:40px;cursor:pointer;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.field{display:block;margin-bottom:20px}
+.field>span{display:block;font-weight:600;margin-bottom:6px}
+.field input[type=text]{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:18px}
+.sw{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.sw button{width:44px;height:44px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.sw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--line),0 0 0 6px var(--ember)}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:12px}
+.icons button{aspect-ratio:1;background:var(--card);border:2px solid var(--line);border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:8px}
+.icons button[aria-pressed="true"]{outline:4px solid var(--ember);outline-offset:-1px}
+.icons svg{width:100%;height:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.api-note{font-size:14px;color:var(--muted);margin:6px 0 24px}
+.stepper{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.stepper button{width:44px;height:44px;background:transparent;border:0;font-size:22px;cursor:pointer}
+.stepper output{min-width:44px;text-align:center;font-weight:700;font-size:18px}
+.check{display:flex;gap:12px;align-items:flex-start;margin:22px 0;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--ember);margin-top:2px}
+.nav-row{display:flex;justify-content:space-between;margin-top:32px;gap:12px}
+.summary{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px}
+.summary table{width:100%;border-collapse:collapse}
+.summary td{padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 25%,transparent)}
+.summary td:last-child{text-align:right;font-weight:600}
+.summary tr.total td{border-bottom:0;font-size:22px;font-weight:800;padding-top:14px}
+.terms{font-size:14px;color:var(--muted);margin:14px 0 20px}
+.aside{position:sticky;top:16px}
+.stage{position:relative;aspect-ratio:1/1.12;display:grid;place-items:center;background:var(--paper2);border:2px solid var(--line);border-radius:28px;overflow:hidden}
+.stage::before{content:"";position:absolute;width:78%;aspect-ratio:1;border-radius:50%;background:var(--gold);opacity:.55}
+.stage svg.can,.stage svg.bottle{position:relative;height:92%;width:auto;filter:drop-shadow(0 22px 18px rgba(42,26,20,.3));transition:transform .4s}
+.stage svg.can{transform:rotate(-6deg)}
+.hero-can{height:clamp(340px,48vw,580px)}
+.hero-can canvas,.stage canvas{display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab;outline-offset:-4px}
+.stage canvas{position:absolute;inset:0;filter:drop-shadow(0 22px 18px rgba(42,26,20,.3))}
+
+.stage-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:8px 18px;cursor:pointer;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.ok{text-align:center;padding:30px 0}
+.ok h2{margin-bottom:12px}
+.ok .code{display:inline-block;border:2px dashed var(--line);border-radius:12px;padding:8px 18px;font-weight:700;font-size:20px;margin:12px 0 24px}
+
+footer{border-top:2px solid var(--line);padding:32px 0 48px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:900px){
+  .stage-stack,.studio{grid-template-columns:1fr}
+  .stage-hero{grid-template-columns:1fr;margin-top:calc(var(--mega) * -0.8)}
+  .hero-left,.hero-right{max-width:none;justify-self:stretch;padding-bottom:0}
+  .hero-left{order:2}.hero-right{order:3}
+  .facts{grid-template-columns:1fr}.facts div{border-right:0;border-bottom:2px solid var(--line)}.facts div:last-child{border-bottom:0}
+  .process{grid-template-columns:1fr 1fr}.process::before{display:none}
+  .aside{position:static;order:-1}
+  .stage{aspect-ratio:auto;height:min(340px,62vw)}
+  .stage::before{width:auto;height:88%}
+  nav.main a.link.hide-sm{display:none}
+}
+@media (max-width:520px){
+  .process{grid-template-columns:1fr}
+  header.top{flex-wrap:wrap;gap:10px}
+  .brand{font-size:19px}
+  nav.main{width:100%;justify-content:space-between;gap:12px}
+  .btn{padding:11px 18px}
+  .nav-row .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-can{animation:none}
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#home" aria-label="Brauatelier home">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#2A1A14"/><path d="M20 7l3.4 7.6 8.2.9-6.1 5.5 1.7 8.1L20 24.8 12.8 29.1l1.7-8.1-6.1-5.5 8.2-.9z" fill="#F0A91C"/></svg>
+      Brauatelier
+    </a>
+    <nav class="main" aria-label="Main">
+      <a class="link hide-sm" href="#how" data-r="how">How it works</a>
+      <a class="link" href="#slots" data-r="slots">Book a slot</a>
+      <a class="btn ember sm" href="#studio" data-r="studio">Design your beer</a>
+    </nav>
+  </header>
+  <main id="main"></main>
+  <footer>
+    <span>Brauatelier – prototype UI. Prices, dates and batches are placeholders.</span>
+    <span>Batch not full within six weeks? Every crate is refunded in full.</span>
+  </footer>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/vendor/three.min.js"></script>
+<script>
+/* ---------- data ---------- */
+const STYLES=[
+ {id:'helles',name:'Helles',abv:4.9,note:'Soft, bready and easy to drink',brew:'Sat 9 Jan',by:'4 Jan',filled:22},
+ {id:'pale',name:'Pale Ale',abv:5.2,note:'Citrus hops over a light malt body',brew:'Sat 16 Jan',by:'11 Jan',filled:31},
+ {id:'ipa',name:'IPA',abv:6.1,note:'Resinous, bitter and tropical',brew:'Sat 23 Jan',by:'18 Jan',filled:12},
+ {id:'weizen',name:'Weizen',abv:5.3,note:'Banana, clove and soft wheat',brew:'Sat 30 Jan',by:'25 Jan',filled:6},
+ {id:'dunkel',name:'Dunkel',abv:5.0,note:'Toasted bread, caramel and cocoa',brew:'Sat 6 Feb',by:'1 Feb',filled:3}
+];
+const TWISTS=['None','Citrus peel','Elderflower','Smoked malt','Cold coffee'];
+const PAL={
+ ember:{bg:'#E8501F',ink:'#FFF1DC',acc:'#2A1A14',name:'Ember'},
+ hop:{bg:'#11704A',ink:'#FFF1DC',acc:'#F0A91C',name:'Hop green'},
+ night:{bg:'#2A1A14',ink:'#F0A91C',acc:'#FBE9D2',name:'Night'},
+ gold:{bg:'#F0A91C',ink:'#2A1A14',acc:'#E8501F',name:'Gold'},
+ cream:{bg:'#FBE9D2',ink:'#2A1A14',acc:'#E8501F',name:'Cream'},
+ sky:{bg:'#3E7CB1',ink:'#FFF1DC',acc:'#F0A91C',name:'Alpine blue'}
+};
+const PATTERNS=[['none','Plain'],['stripes','Stripes'],['dots','Dots'],['band','Band']];
+const ICONKEYS=['hop','wheat','star','peak','sun'];
+const PRICE={can:68,bottle:72};
+const FORMATS={can:'24 cans · 0.33 l',bottle:'20 bottles · 0.5 l'};
+const S={style:'ipa',twist:'Citrus peel',name:'Hopfenfuchs',tagline:'Gebraut für Freunde',palette:'ember',pattern:'stripes',
+ logo:{kind:'icon',key:'hop',data:null},art:null,format:'can',qty:1,open:false,step:0,reserved:null};
+const sty=id=>STYLES.find(x=>x.id===id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=s=>document.querySelector(s);
+let uidc=0;
+let V=null;
+
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2800);}
+
+/* ---------- artwork ---------- */
+function icon(key,ink,bg){
+  const i={
+   hop:`<path d="M0-16C10-14 14-4 10 6 7 13 3 17 0 18-3 17-7 13-10 6-14-4-10-14 0-16Z" fill="${ink}"/><path d="M-9-2Q0 4 9-2M-7 6Q0 11 7 6M0-16V18" stroke="${bg}" fill="none" stroke-width="1.7"/>`,
+   wheat:`<path d="M0 18V-14" stroke="${ink}" stroke-width="2"/>${[-10,-2,6].map(y=>`<ellipse cx="-6" cy="${y}" rx="4" ry="7" transform="rotate(-30 -6 ${y})" fill="${ink}"/><ellipse cx="6" cy="${y}" rx="4" ry="7" transform="rotate(30 6 ${y})" fill="${ink}"/>`).join('')}<ellipse cx="0" cy="-15" rx="3.5" ry="6" fill="${ink}"/>`,
+   star:`<polygon points="0,-17 5,-5 18,-5 8,3 12,16 0,8 -12,16 -8,3 -18,-5 -5,-5" fill="${ink}"/>`,
+   peak:`<polygon points="-19,15 -5,-10 3,2 9,-6 19,15" fill="${ink}"/><polygon points="-5,-10 -1,-3 -9,-3" fill="${bg}"/>`,
+   sun:`<circle r="8" fill="${ink}"/>${[0,45,90,135,180,225,270,315].map(a=>`<rect x="-1.6" y="-17" width="3.2" height="7" rx="1.6" transform="rotate(${a})" fill="${ink}"/>`).join('')}`
+  };
+  return i[key]||'';
+}
+function nameLines(n){
+  n=(n||'').trim()||'Your beer';
+  const w=n.split(/\s+/);
+  if(w.length>1&&n.length>9){const m=Math.ceil(w.length/2);return[w.slice(0,m).join(' '),w.slice(m).join(' ')];}
+  return[n];
+}
+function logoMark(s,cx,cy,r,P,u){
+  let inner;
+  if((s.logo.kind==='upload'||s.logo.kind==='mask')&&s.logo.data){
+    inner=`<clipPath id="lg${u}"><circle cx="${cx}" cy="${cy}" r="${r-3}"/></clipPath><image href="${s.logo.data}" x="${cx-r+3}" y="${cy-r+3}" width="${(r-3)*2}" height="${(r-3)*2}" preserveAspectRatio="xMidYMid slice" clip-path="url(#lg${u})"/>`;
+  }else{
+    inner=`<g transform="translate(${cx} ${cy}) scale(${r/24})">${icon(s.logo.key,P.ink,P.bg)}</g>`;
+  }
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${P.ink}" stroke-width="2.2"/>${inner}`;
+}
+function patternDefs(s,P,u){
+  if(s.pattern==='stripes')return `<pattern id="pt${u}" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="6" height="14" fill="${P.acc}" opacity=".3"/></pattern>`;
+  if(s.pattern==='dots')return `<pattern id="pt${u}" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="8" cy="8" r="2.6" fill="${P.acc}" opacity=".35"/></pattern>`;
+  return '';
+}
+function patternFill(s,P,u,y,h){
+  if(s.pattern==='stripes'||s.pattern==='dots')return `<rect x="0" y="0" width="200" height="400" fill="url(#pt${u})"/>`;
+  if(s.pattern==='band')return `<rect x="0" y="${y}" width="200" height="${h}" fill="${P.acc}" opacity=".25"/>`;
+  return '';
+}
+function canSVG(s){
+  const u=++uidc,P=PAL[s.palette],st=sty(s.style),L=nameLines(s.name);
+  const fs=L.length>1?26:32,y0=L.length>1?214:228;
+  const sil='M58 40H142C150 48 162 56 164 76V324C164 338 156 346 148 352Q100 364 52 352C44 346 36 338 36 324V76C38 56 50 48 58 40Z';
+  const print='M30 80Q100 92 170 80V332Q100 344 30 332Z';
+  const nm=L.map((t,i)=>`<text x="100" y="${y0+i*fs*.95}" text-anchor="middle" font-size="${fs}" font-weight="900" fill="${P.ink}" textLength="${Math.min(100,Math.max(40,t.length*fs*.6))}" lengthAdjust="spacingAndGlyphs" style="font-family:Archivo,Impact,sans-serif">${esc(t.toUpperCase())}</text>`).join('');
+  const tagY=y0+(L.length-1)*fs*.95+22;
+  const tag=s.tagline.trim()?`<text x="100" y="${tagY}" text-anchor="middle" font-size="9.5" fill="${P.ink}" textLength="${Math.min(98,s.tagline.trim().length*5.2)}" lengthAdjust="spacingAndGlyphs" style="font-family:'Work Sans',sans-serif">${esc(s.tagline.trim())}</text>`:'';
+  return `<svg class="can" viewBox="0 0 200 392" role="img" aria-label="Beer can: ${esc(s.name)}, ${st.name}">
+  <defs>
+   <clipPath id="cs${u}"><path d="${sil}"/></clipPath>
+   <linearGradient id="mt${u}"><stop offset="0" stop-color="#6f757c"/><stop offset=".15" stop-color="#c4c8cd"/><stop offset=".3" stop-color="#eceef0"/><stop offset=".5" stop-color="#b3b8bd"/><stop offset=".75" stop-color="#8f959b"/><stop offset="1" stop-color="#5b6168"/></linearGradient>
+   <linearGradient id="sh${u}" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".08" stop-color="#000" stop-opacity=".2"/><stop offset=".22" stop-color="#fff" stop-opacity=".34"/><stop offset=".32" stop-color="#fff" stop-opacity=".12"/><stop offset=".52" stop-color="#fff" stop-opacity="0"/><stop offset=".74" stop-color="#000" stop-opacity=".12"/><stop offset=".92" stop-color="#000" stop-opacity=".36"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>
+   <linearGradient id="sv${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset=".08" stop-color="#fff" stop-opacity="0"/><stop offset=".9" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient>
+   ${patternDefs(s,P,u)}
+  </defs>
+  <path d="${sil}" fill="url(#mt${u})"/>
+  <g clip-path="url(#cs${u})">
+   <path d="${print}" fill="${P.bg}"/>
+   ${s.pattern==='stripes'||s.pattern==='dots'?`<path d="${print}" fill="url(#pt${u})"/>`:''}
+   ${s.pattern==='band'?`<rect x="30" y="${y0-fs-6}" width="140" height="${fs*L.length+44}" fill="${P.acc}" opacity=".25"/>`:''}
+   <text x="100" y="110" text-anchor="middle" font-size="10.5" font-weight="700" fill="${P.ink}" textLength="80" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
+   ${logoMark(s,100,152,28,P,u)}${nm}${tag}
+   <line x1="58" x2="142" y1="296" y2="296" stroke="${P.ink}" stroke-width="1.5"/>
+   <text x="100" y="314" text-anchor="middle" font-size="15" font-weight="800" fill="${P.ink}" style="font-family:Archivo,sans-serif">${st.name}</text>
+   <text x="100" y="326" text-anchor="middle" font-size="8.5" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.abv.toFixed(1)}% vol · 0.33 l</text>
+   <path d="M30 80Q100 92 170 80" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="1.5"/>
+   <path d="M30 332Q100 344 170 332" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="1.5"/>
+   <rect x="30" y="36" width="140" height="330" fill="url(#sh${u})"/>
+   <rect x="30" y="36" width="140" height="330" fill="url(#sv${u})"/>
+  </g>
+    <path d="${sil}" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.2"/>
+  <ellipse cx="100" cy="40" rx="44" ry="8" fill="url(#mt${u})" stroke="#6c7279" stroke-width="1"/>
+  <ellipse cx="100" cy="40.5" rx="37" ry="5.6" fill="#a9aeb4"/>
+  <ellipse cx="86" cy="41" rx="10" ry="2.6" fill="#5f656c"/>
+  <rect x="94" y="35.5" width="30" height="9" rx="4.5" fill="#d5d8dc" stroke="#80868d" stroke-width=".8"/>
+  <circle cx="98.5" cy="40" r="2.3" fill="#80868d"/>
+  <path d="M52 352Q100 364 148 352L146 357Q100 369 54 357Z" fill="#8a9097" stroke="#000" stroke-opacity=".25" stroke-width=".8"/>
+  </svg>`;
+}
+function canSVGOld(s){
+  const u=++uidc,P=PAL[s.palette],st=sty(s.style),L=nameLines(s.name);
+  const fs=L.length>1?30:38,y0=L.length>1?206:222;
+  const nm=L.map((t,i)=>`<text x="100" y="${y0+i*fs*.95}" text-anchor="middle" font-size="${fs}" font-weight="900" fill="${P.ink}" textLength="${Math.min(134,Math.max(40,t.length*fs*.62))}" lengthAdjust="spacingAndGlyphs" style="font-family:Archivo,Impact,sans-serif;text-transform:uppercase">${esc(t.toUpperCase())}</text>`).join('');
+  const tagY=y0+(L.length-1)*fs*.95+26;
+  const tag=s.tagline.trim()?`<text x="100" y="${tagY}" text-anchor="middle" font-size="10" fill="${P.ink}" textLength="${Math.min(126,s.tagline.trim().length*5.4)}" lengthAdjust="spacingAndGlyphs" style="font-family:'Work Sans',sans-serif">${esc(s.tagline.trim())}</text>`:'';
+  return `<svg class="can" viewBox="0 0 200 392" role="img" aria-label="Beer can: ${esc(s.name)}, ${st.name}">
+  <defs><clipPath id="cb${u}"><path d="M28 54C28 42 38 36 50 34H150C162 36 172 42 172 54V336C172 348 162 354 150 356H50C38 354 28 348 28 336Z"/></clipPath>
+  <linearGradient id="sh${u}" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".25" stop-color="#fff" stop-opacity="0"/><stop offset=".78" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
+  ${patternDefs(s,P,u)}</defs>
+  <ellipse cx="100" cy="378" rx="60" ry="7" fill="#000" opacity=".12"/>
+  <g clip-path="url(#cb${u})"><rect x="20" y="30" width="160" height="330" fill="${P.bg}"/>${patternFill(s,P,u,y0-fs-6,fs*L.length+44)}
+   <text x="100" y="72" text-anchor="middle" font-size="11" font-weight="700" fill="${P.ink}" textLength="88" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
+   ${logoMark(s,100,122,30,P,u)}${nm}${tag}
+   <line x1="48" x2="152" y1="308" y2="308" stroke="${P.ink}" stroke-width="1.5"/>
+   <text x="100" y="330" text-anchor="middle" font-size="15" font-weight="800" fill="${P.ink}" style="font-family:Archivo,sans-serif">${st.name}</text>
+   <text x="100" y="345" text-anchor="middle" font-size="9" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.abv.toFixed(1)}% vol · 0.33 l</text>
+   <rect x="28" y="34" width="144" height="322" fill="url(#sh${u})"/></g>
+  <path d="M50 34L58 21Q100 12 142 21L150 34Z" fill="#cfd3d8"/><ellipse cx="100" cy="21" rx="42" ry="6" fill="#e9ebee"/><rect x="87" y="15" width="26" height="7" rx="3.5" fill="#aab0b7"/>
+  <path d="M50 356H150L143 367Q100 374 57 367Z" fill="#b8bdc4"/></svg>`;
+}
+function bottleSVG(s){
+  const u=++uidc,P=PAL[s.palette],st=sty(s.style),L=nameLines(s.name);
+  const fs=L.length>1?14:18,y0=L.length>1?277:282;
+  const body='M90 30H110V104C110 124 118 134 128 146C138 158 142 170 142 188V346C142 357 136 364 126 364H74C64 364 58 357 58 346V188C58 170 62 158 72 146C82 134 90 124 90 104Z';
+  const lab='M58 198Q100 209 142 198V322Q100 333 58 322Z';
+  const cap=P.bg==='#FBE9D2'?'#E8501F':P.bg;
+  const nm=L.map((t,i)=>`<text x="100" y="${y0+i*fs*1.02}" text-anchor="middle" font-size="${fs}" font-weight="900" fill="${P.ink}" textLength="${Math.min(66,Math.max(28,t.length*fs*.6))}" lengthAdjust="spacingAndGlyphs" style="font-family:Archivo,Impact,sans-serif">${esc(t.toUpperCase())}</text>`).join('');
+  const bubbles=[[96,126,1.5],[104,112,1.2],[92,150,1.6],[118,160,1.3],[82,176,1.1],[104,140,1.2]].map(b=>`<circle cx="${b[0]}" cy="${b[1]}" r="${b[2]}" fill="#fff" opacity=".45"/>`).join('');
+  return `<svg class="bottle" viewBox="0 0 200 392" role="img" aria-label="Beer bottle: ${esc(s.name)}, ${st.name}">
+  <defs>
+   <clipPath id="bs${u}"><path d="${body}"/></clipPath><clipPath id="lc${u}"><path d="${lab}"/></clipPath>
+   <filter id="bl${u}" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="4"/></filter>
+   <linearGradient id="gl${u}" gradientUnits="userSpaceOnUse" x1="58" x2="142"><stop offset="0" stop-color="#1c0d03"/><stop offset=".14" stop-color="#7b4513"/><stop offset=".32" stop-color="#b06a20"/><stop offset=".52" stop-color="#8f5317"/><stop offset=".78" stop-color="#5a300c"/><stop offset="1" stop-color="#190b02"/></linearGradient>
+   <linearGradient id="be${u}" gradientUnits="userSpaceOnUse" x1="58" x2="142"><stop offset="0" stop-color="#f2b14a" stop-opacity=".15"/><stop offset=".35" stop-color="#f6c25c" stop-opacity=".55"/><stop offset=".7" stop-color="#d98a1e" stop-opacity=".4"/><stop offset="1" stop-color="#8a4a0a" stop-opacity=".1"/></linearGradient>
+   <linearGradient id="ls${u}" gradientUnits="userSpaceOnUse" x1="58" x2="142"><stop offset="0" stop-color="#000" stop-opacity=".42"/><stop offset=".14" stop-color="#000" stop-opacity=".08"/><stop offset=".3" stop-color="#fff" stop-opacity=".26"/><stop offset=".48" stop-color="#fff" stop-opacity="0"/><stop offset=".8" stop-color="#000" stop-opacity=".1"/><stop offset="1" stop-color="#000" stop-opacity=".46"/></linearGradient>
+   <linearGradient id="cs${u}" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".4"/><stop offset=".3" stop-color="#fff" stop-opacity=".35"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></linearGradient>
+   <linearGradient id="sp${u}" gradientUnits="userSpaceOnUse" x1="0" y1="160" x2="0" y2="350"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".25" stop-color="#fff" stop-opacity=".7"/><stop offset=".8" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+   ${patternDefs(s,P,u)}
+  </defs>
+  <ellipse cx="106" cy="372" rx="50" ry="7" fill="#2A1A14" opacity=".3" filter="url(#bl${u})"/>
+  <path d="${body}" fill="url(#gl${u})"/>
+  <g clip-path="url(#bs${u})">
+   <rect x="56" y="96" width="88" height="272" fill="url(#be${u})"/>
+   ${bubbles}
+   <ellipse cx="100" cy="96" rx="10" ry="2.4" fill="#fbd681" opacity=".85"/>
+   <ellipse cx="100" cy="360" rx="40" ry="5" fill="#000" opacity=".35"/>
+   <path d="M60 346C60 356 66 362 74 362H126C134 362 140 356 140 346" fill="none" stroke="#ffd9a0" stroke-opacity=".35" stroke-width="2"/>
+  </g>
+  <g clip-path="url(#lc${u})">
+   <rect x="56" y="196" width="88" height="140" fill="${P.bg}"/>
+   ${s.pattern==='stripes'||s.pattern==='dots'?`<rect x="56" y="196" width="88" height="140" fill="url(#pt${u})"/>`:''}
+   ${s.pattern==='band'?`<rect x="56" y="${y0-fs-4}" width="88" height="${fs*L.length+22}" fill="${P.acc}" opacity=".25"/>`:''}
+   <text x="100" y="219" text-anchor="middle" font-size="6.5" font-weight="700" fill="${P.ink}" textLength="40" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
+   ${logoMark(s,100,245,15,P,u)}${nm}
+   <text x="100" y="309" text-anchor="middle" font-size="7" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.name} · ${st.abv.toFixed(1)}% · 0.5 l</text>
+   <rect x="56" y="196" width="88" height="140" fill="url(#ls${u})"/>
+  </g>
+  <path d="${lab}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1"/>
+  <path d="M67 172C64 186 64 196 64 208V338" stroke="url(#sp${u})" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M94 44V104C94 122 88 132 80 142" stroke="#fff" stroke-opacity=".4" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M136 190V338" stroke="#ffdca6" stroke-opacity=".3" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M106 48V100" stroke="#ffdca6" stroke-opacity=".3" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="${body}" fill="none" stroke="#1a0b02" stroke-opacity=".55" stroke-width="1.4"/>
+  <rect x="86.5" y="36" width="27" height="6" rx="3" fill="url(#gl${u})" stroke="#1a0b02" stroke-opacity=".5"/>
+  <rect x="86.5" y="36" width="27" height="6" rx="3" fill="url(#cs${u})" opacity=".6"/>
+  <path d="M85 30L88 35L91 30L94 35L97 30L100 35L103 30L106 35L109 30L112 35L115 30Z" fill="${cap}"/>
+  <rect x="85" y="14" width="30" height="16" fill="${cap}"/>
+  <ellipse cx="100" cy="14" rx="15" ry="3.6" fill="${cap}"/>
+  <ellipse cx="100" cy="14" rx="15" ry="3.6" fill="#fff" opacity=".3"/>
+  <path d="M90 15V32M95 15V34M100 15V35M105 15V34M110 15V32" stroke="#000" stroke-opacity=".18" stroke-width="1"/>
+  <path d="M85 14H115V30L112 35L109 30L106 35L103 30L100 35L97 30L94 35L91 30L88 35L85 30Z" fill="url(#cs${u})"/>
+  </svg>`;
+}
+function bottleSVGOld(s){
+  const u=++uidc,P=PAL[s.palette],st=sty(s.style),L=nameLines(s.name);
+  const fs=L.length>1?17:21,y0=L.length>1?272:280;
+  const nm=L.map((t,i)=>`<text x="100" y="${y0+i*fs}" text-anchor="middle" font-size="${fs}" font-weight="900" fill="${P.ink}" textLength="${Math.min(80,Math.max(30,t.length*fs*.62))}" lengthAdjust="spacingAndGlyphs" style="font-family:Archivo,Impact,sans-serif">${esc(t.toUpperCase())}</text>`).join('');
+  return `<svg class="bottle" viewBox="0 0 200 392" role="img" aria-label="Beer bottle: ${esc(s.name)}, ${st.name}">
+  <defs><clipPath id="lb${u}"><rect x="54" y="200" width="92" height="128"/></clipPath>${patternDefs(s,P,u)}</defs>
+  <ellipse cx="100" cy="378" rx="48" ry="6" fill="#000" opacity=".12"/>
+  <path d="M88 30H112V118C112 150 146 158 146 198V346C146 354 140 360 132 360H68C60 360 54 354 54 346V198C54 158 88 150 88 118Z" fill="#6b3d14"/>
+  <path d="M94 36H98V118C98 156 66 166 66 200V346" stroke="#fff" stroke-opacity=".22" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <rect x="84" y="18" width="32" height="15" rx="3" fill="${P.acc==='#FBE9D2'?'#E8501F':P.acc}"/>
+  <g clip-path="url(#lb${u})"><rect x="54" y="200" width="92" height="128" fill="${P.bg}"/>
+   <g transform="translate(54 200) scale(.46 .32)"><g transform="translate(-54 -200)">${s.pattern==='stripes'||s.pattern==='dots'?`<rect x="0" y="0" width="200" height="900" fill="url(#pt${u})" transform="translate(0 600) scale(1 -1)"/>`:''}</g></g>
+   ${s.pattern==='band'?`<rect x="54" y="${y0-fs-6}" width="92" height="${fs*L.length+30}" fill="${P.acc}" opacity=".25"/>`:''}
+   <text x="100" y="218" text-anchor="middle" font-size="7" font-weight="700" fill="${P.ink}" textLength="46" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
+   ${logoMark(s,100,242,16,P,u)}${nm}
+   <text x="100" y="318" text-anchor="middle" font-size="8" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.name} · ${st.abv.toFixed(1)}% · 0.5 l</text></g></svg>`;
+}
+function tankSVG(body,level){
+  const u=++uidc;
+  return `<svg viewBox="0 0 140 190" aria-hidden="true"><rect x="32" y="150" width="7" height="34" fill="#2A1A14"/><rect x="101" y="150" width="7" height="34" fill="#2A1A14"/><rect x="24" y="182" width="92" height="5" rx="2" fill="#2A1A14"/>
+  <path d="M20 44Q20 22 70 14Q120 22 120 44V132Q120 150 100 156H40Q20 150 20 132Z" fill="${body}" stroke="#2A1A14" stroke-width="3"/>
+  <clipPath id="tw${u}"><rect x="34" y="62" width="72" height="52" rx="10"/></clipPath>
+  <rect x="34" y="62" width="72" height="52" rx="10" fill="#2A1A14"/>
+  <g clip-path="url(#tw${u})"><rect x="34" y="${114-52*level}" width="72" height="${52*level}" fill="#F0A91C"/>${level>0.2?`<circle cx="50" cy="${120-52*level}" r="6" fill="#FFF1DC"/><circle cx="68" cy="${118-52*level}" r="7" fill="#FFF1DC"/><circle cx="88" cy="${120-52*level}" r="6" fill="#FFF1DC"/>`:''}</g>
+  <circle cx="70" cy="132" r="7" fill="#F0A91C" stroke="#2A1A14" stroke-width="2"/><rect x="60" y="6" width="20" height="10" rx="3" fill="#2A1A14"/></svg>`;
+}
+function crates(filled,mine){
+  let h='';for(let i=0;i<40;i++)h+=`<i class="${i<filled?'on':i<filled+mine?'mine':''}"></i>`;
+  return `<div class="crates" role="img" aria-label="${filled} of 40 crates reserved">${h}</div>`;
+}
+
+/* ---------- 3D viewer ---------- */
+const IMGS={};
+function getImg(src,cb){
+  let e=IMGS[src];
+  if(!e){const img=new Image();e=IMGS[src]={img,ok:false,cbs:[]};img.onload=()=>{e.ok=true;e.cbs.forEach(f=>f());};img.src=src;}
+  if(e.ok)return e.img;
+  if(cb)e.cbs.push(cb);
+  return null;
+}
+function logoSrc(s,P){
+  if((s.logo.kind==='upload'||s.logo.kind==='mask')&&s.logo.data)return s.logo.data;
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="-22 -22 44 44" width="264" height="264">'+icon(s.logo.key,P.ink,P.bg)+'</svg>');
+}
+function drawLabel(c,kind,s,cb){
+  const P=PAL[s.palette],st=sty(s.style),can=kind==='can';
+  const w=2048,h=can?1180:750,cx=w/2;
+  c.width=w;c.height=h;
+  const x=c.getContext('2d');
+  const F=(wt,sz)=>wt+' '+sz+"px Archivo, Impact, 'Arial Narrow', sans-serif";
+  const B=(wt,sz)=>wt+' '+sz+"px 'Work Sans', system-ui, sans-serif";
+  const ls=v=>{if('letterSpacing' in x)x.letterSpacing=v;};
+  const fit=(t,max,font,limit)=>{let sz=max;x.font=font(sz);while(x.measureText(t).width>limit&&sz>16){sz-=4;x.font=font(sz);}return sz;};
+  x.fillStyle=P.bg;x.fillRect(0,0,w,h);
+  if(s.art){const ai=getImg(s.art,cb);if(ai&&ai.width){const ts=Math.round(h*.5);for(let xx=0;xx<w;xx+=ts)for(let yy=0;yy<h;yy+=ts)x.drawImage(ai,xx,yy,ts,ts);}}
+  x.textAlign='center';x.textBaseline='alphabetic';
+  if(s.pattern==='stripes'){x.save();x.translate(w/2,h/2);x.rotate(35*Math.PI/180);x.fillStyle=P.acc;x.globalAlpha=.28;for(let i=-w;i<w;i+=62)x.fillRect(i,-w,26,2*w);x.restore();x.globalAlpha=1;}
+  if(s.pattern==='dots'){x.fillStyle=P.acc;x.globalAlpha=.32;for(let yy=30;yy<h;yy+=64)for(let xx=((yy/64)%2?62:30);xx<w;xx+=64){x.beginPath();x.arc(xx,yy,10,0,7);x.fill();}x.globalAlpha=1;}
+  const L=nameLines(s.name).map(t=>t.toUpperCase());
+  const lim=can?430:370,maxS=L.length>1?(can?118:90):(can?150:118);
+  const nsz=Math.min(...L.map(t=>fit(t,maxS,sz=>F(900,sz),lim)));
+  const nameY=(can?.545:.52)*h,lineH=nsz*.98;
+  if(s.pattern==='band'){x.globalAlpha=.25;x.fillStyle=P.acc;x.fillRect(0,nameY-nsz*.95,w,lineH*L.length+(can?110:80));x.globalAlpha=1;}
+  if(s.art){x.globalAlpha=.82;x.fillStyle=P.bg;x.fillRect(cx-260,h*.03,520,h*.94);x.globalAlpha=1;}
+  x.fillStyle=P.ink;x.font=F(700,can?46:38);ls(can?'12px':'9px');
+  x.fillText('Brauatelier',cx,(can?.115:.105)*h);ls('0px');
+  const ly=(can?.29:.265)*h,lr=(can?.105:.1)*h;
+  x.lineWidth=can?9:8;x.strokeStyle=P.ink;x.beginPath();x.arc(cx,ly,lr,0,7);x.stroke();
+  const img=getImg(logoSrc(s,P),cb);
+  if(img&&img.width){
+    x.save();x.beginPath();x.arc(cx,ly,lr-10,0,7);x.clip();
+    if(s.logo.kind==='upload'){const m=Math.min(img.width,img.height);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,cx-lr+10,ly-lr+10,2*lr-20,2*lr-20);}
+    else if(s.logo.kind==='mask'){const tc=document.createElement('canvas');tc.width=tc.height=512;const tx=tc.getContext('2d');tx.drawImage(img,0,0,512,512);tx.globalCompositeOperation='source-in';tx.fillStyle=P.ink;tx.fillRect(0,0,512,512);x.drawImage(tc,cx-lr*.9,ly-lr*.9,lr*1.8,lr*1.8);}
+    else x.drawImage(img,cx-lr*.82,ly-lr*.82,lr*1.64,lr*1.64);
+    x.restore();
+  }
+  x.fillStyle=P.ink;x.font=F(900,nsz);
+  L.forEach((t,i)=>x.fillText(t,cx,nameY+i*lineH));
+  const nb=nameY+(L.length-1)*lineH,tg=s.tagline.trim();
+  if(tg){const ts=fit(tg,can?42:34,sz=>B(500,sz),lim);x.font=B(500,ts);x.fillText(tg,cx,nb+ts*1.7);}
+  const ry=(can?.775:.8)*h;
+  x.strokeStyle=P.ink;x.lineWidth=5;x.beginPath();x.moveTo(cx-(can?180:150),ry);x.lineTo(cx+(can?180:150),ry);x.stroke();
+  x.font=F(800,can?70:52);x.fillText(st.name,cx,ry+(can?84:62));
+  x.font=B(500,can?34:28);x.fillText(st.abv.toFixed(1)+'% vol · '+(can?'0.33 l':'0.5 l'),cx,ry+(can?136:104));
+  const back=xc=>{
+    x.fillStyle=P.ink;x.font=F(900,can?110:90);x.fillText('Brauatelier',xc,.40*h);
+    x.font=B(500,can?40:34);
+    x.fillText('Brewed on demand in Austria',xc,.52*h);
+    x.fillText('Your beer. Your label.',xc,.60*h);
+    x.fillText(can?'0.33 l · 24 cans per crate':'0.5 l · 20 bottles per crate',xc,.70*h);
+  };
+  back(0);back(w);
+}
+function mount3D(el,getS,fixedKind){
+  if(!window.THREE)return null;
+  const T=THREE;let R;
+  try{R=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});}catch(e){return null;}
+  R.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  R.outputEncoding=T.sRGBEncoding;
+  const cv=R.domElement;cv.tabIndex=0;cv.setAttribute('role','img');
+  cv.setAttribute('aria-label','3D preview of your beer. Drag or use the arrow keys to rotate.');
+  el.appendChild(cv);
+  const scene=new T.Scene(),cam=new T.PerspectiveCamera(28,1,.1,100);
+  {
+    const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
+    const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#fff6e8');g.addColorStop(.5,'#e8c9a2');g.addColorStop(1,'#4a2e1e');
+    x.fillStyle=g;x.fillRect(0,0,512,256);x.fillStyle='#fff';
+    [[40,60,110,70],[300,50,120,80],[190,40,40,100],[440,90,50,60]].forEach(r=>x.fillRect(r[0],r[1],r[2],r[3]));
+    const et=new T.CanvasTexture(c);et.mapping=T.EquirectangularReflectionMapping;et.encoding=T.sRGBEncoding;
+    const pm=new T.PMREMGenerator(R);scene.environment=pm.fromEquirectangular(et).texture;et.dispose();pm.dispose();
+  }
+  scene.add(new T.AmbientLight(0xffffff,.45));
+  const key=new T.DirectionalLight(0xfff1dc,1.5);key.position.set(-3,4,5);scene.add(key);
+  const rim=new T.DirectionalLight(0xffc88a,1.1);rim.position.set(4,2,-4);scene.add(rim);
+  const pivot=new T.Group(),canG=new T.Group(),botG=new T.Group();pivot.add(canG,botG);scene.add(pivot);
+  const C=h=>new T.Color(h).convertSRGBToLinear();
+  const lathe=a=>new T.LatheGeometry(a.map(p=>new T.Vector2(p[0],p[1])),96);
+  const cvs={can:document.createElement('canvas'),bottle:document.createElement('canvas')};
+  const texs={};
+  ['can','bottle'].forEach(k=>{const tx=new T.CanvasTexture(cvs[k]);tx.encoding=T.sRGBEncoding;tx.anisotropy=R.capabilities.getMaxAnisotropy();texs[k]=tx;});
+  /* can */
+  const metal=new T.MeshStandardMaterial({color:C(0xc9ced4),metalness:1,roughness:.3,envMapIntensity:.95,side:T.DoubleSide});
+  canG.add(new T.Mesh(lathe([[0,.2],[.6,.2],[.66,.05],[.72,0],[.8,.03],[.86,.12],[.94,.24],[1,.36],[1,4],[.99,4.1],[.93,4.24],[.84,4.38],[.78,4.48],[.76,4.54],[.77,4.6],[.82,4.64],[.82,4.69],[.75,4.69],[.7,4.62],[.66,4.56],[0,4.56]]),metal));
+  const canMat=new T.MeshPhysicalMaterial({map:texs.can,metalness:.35,roughness:.38,clearcoat:.5,clearcoatRoughness:.25,envMapIntensity:.9});
+  const pm1=new T.Mesh(new T.CylinderGeometry(1.006,1.006,3.64,128,1,true),canMat);pm1.position.y=2.18;pm1.rotation.y=Math.PI;canG.add(pm1);
+  const tab=new T.Mesh(new T.BoxGeometry(.55,.035,.24),metal);tab.position.set(.12,4.6,0);canG.add(tab);
+  const hole=new T.Mesh(new T.CylinderGeometry(.3,.3,.01,32),new T.MeshStandardMaterial({color:C(0x3a3f45),roughness:.6}));hole.scale.z=.55;hole.position.set(-.26,4.566,0);canG.add(hole);
+  canG.position.y=-2.37;
+  /* bottle */
+  const glass=new T.MeshPhysicalMaterial({color:C(0x3a1a04),metalness:0,roughness:.06,clearcoat:1,clearcoatRoughness:.04,transparent:true,opacity:.93,envMapIntensity:.9,side:T.DoubleSide});
+  const liquid=new T.MeshStandardMaterial({color:C(0x5e2c05),emissive:C(0x2a1000),emissiveIntensity:.2,roughness:.5});
+  botG.add(new T.Mesh(lathe([[0,.12],[.55,.12],[.7,.12],[.78,.2],[.79,.3],[.79,2.55],[.77,2.85],[.69,3.2],[.52,3.55],[.34,3.85],[.25,4.1],[.22,4.35],[.22,4.6],[0,4.6]]),liquid));
+  const gl=new T.Mesh(lathe([[0,.06],[.56,.06],[.7,0],[.8,.1],[.82,.3],[.82,2.55],[.8,2.85],[.72,3.2],[.55,3.55],[.37,3.85],[.28,4.1],[.25,4.35],[.25,4.95],[.28,5],[.32,5.07],[.32,5.18],[.27,5.22]]),glass);gl.renderOrder=2;botG.add(gl);
+  const bMat=new T.MeshStandardMaterial({map:texs.bottle,roughness:.55,metalness:0,envMapIntensity:.5});
+  const lb=new T.Mesh(new T.CylinderGeometry(.827,.827,1.9,128,1,true),bMat);lb.position.y=1.5;lb.rotation.y=Math.PI;botG.add(lb);
+  const capMat=new T.MeshStandardMaterial({color:C(0xe8501f),metalness:.6,roughness:.35,flatShading:true,envMapIntensity:1.2});
+  const cap=new T.Mesh(new T.CylinderGeometry(.33,.36,.16,28,1),capMat);cap.position.y=5.25;botG.add(cap);
+  botG.position.y=-2.68;
+  /* state */
+  let kind='can',dirty=true,raf=0,ry=0,tx=.14,intro=false,drag=false,lx=0,ly=0;
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){ry=.9;intro=true;}
+  const dims={can:[4.75,2.05],bottle:[5.35,1.7]};
+  function frame(){
+    const d=dims[kind],t=Math.tan(28*Math.PI/360),asp=cam.aspect||1;
+    cam.position.set(0,0,Math.max((d[0]*1.3/2)/t,(d[1]*1.35/2)/(t*asp)));
+    cam.lookAt(0,0,0);
+  }
+  function update(){
+    const s=getS();kind=fixedKind||s.format;
+    canG.visible=kind==='can';botG.visible=kind==='bottle';
+    const P=PAL[s.palette];capMat.color.set(P.bg==='#FBE9D2'?'#E8501F':P.bg).convertSRGBToLinear();
+    drawLabel(cvs[kind],kind,s,()=>update());
+    texs[kind].needsUpdate=true;
+    frame();dirty=true;
+  }
+  function size(){
+    const w=el.clientWidth||300,h=el.clientHeight||300;
+    R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();frame();dirty=true;
+  }
+  const ro=new ResizeObserver(size);ro.observe(el);
+  cv.addEventListener('pointerdown',e=>{drag=true;intro=false;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;ry+=(e.clientX-lx)*.012;tx=Math.max(-.1,Math.min(.5,tx+(e.clientY-ly)*.005));lx=e.clientX;ly=e.clientY;dirty=true;});
+  const up=()=>{drag=false;cv.style.cursor='grab';};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  cv.addEventListener('keydown',e=>{
+    const m={ArrowLeft:[-.3,0],ArrowRight:[.3,0],ArrowUp:[0,-.08],ArrowDown:[0,.08]}[e.key];
+    if(m){e.preventDefault();intro=false;ry+=m[0];tx=Math.max(-.1,Math.min(.5,tx+m[1]));dirty=true;}
+  });
+  function loop(){
+    raf=requestAnimationFrame(loop);
+    if(intro&&!drag){ry+=(0-ry)*.08;if(Math.abs(ry)<.003){ry=0;intro=false;}dirty=true;}
+    if(!dirty)return;
+    pivot.rotation.set(tx,ry,0);R.render(scene,cam);dirty=false;
+  }
+  size();update();loop();
+  if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('900 80px Archivo'),document.fonts.load("500 40px 'Work Sans'")]).then(update).catch(()=>{});}
+  return {update,dispose(){cancelAnimationFrame(raf);ro.disconnect();Object.values(texs).forEach(x=>x.dispose());R.dispose();cv.remove();}};
+}
+
+/* ---------- views ---------- */
+const main=$('#main');
+function home(){
+  const st=sty(S.style),left=40-st.filled;
+  main.innerHTML=`
+  <section class="hero">
+    <h1 class="mega"><span>Your beer.</span><span>Your label.</span></h1>
+    <div class="stage-hero">
+      <div class="hero-left"><p>Design your own beer: taste, name, can and label. Reserve a crate. When 40 crates fill a shared batch, a real Austrian brewery brews it.</p>
+        <a class="btn ember" href="#studio">Design your can</a></div>
+      <div class="hero-can" id="heroCan"></div>
+      <div class="hero-right"><div class="batch-card"><h3>${st.name} batch</h3><p class="sub">Brew day ${st.brew} · fills by ${st.by}</p>${crates(st.filled,0)}<div class="meta"><span>${st.filled} of 40 crates</span><span style="color:var(--ember)">${left} to go</span></div>
+        <p style="margin:12px 0 0"><a href="#slots">See all open batches</a></p></div></div>
+    </div>
+  </section>
+  <section class="block"><div class="facts">
+    <div><b>40</b><span>crates fill one shared batch. Then we brew.</span></div>
+    <div><b>6 wks</b><span>to fill it. If it doesn’t fill, every crate is refunded.</span></div>
+    <div><b>1 crate</b><span>is all it takes to own your beer, from a real brewery.</span></div>
+  </div></section>
+  <section class="block" id="how-sec"><h2 class="big">How a batch gets made</h2>
+    <p class="lead">The brewery is paid before it buys malt, bottles or labour. You get a beer nobody else has.</p>
+    <div class="process">
+      <div class="step-tank">${tankSVG('#E8A33B',.3)}<span class="pill"><em>1</em>Design</span><p>Pick a style, name your beer and draw the can or bottle label.</p></div>
+      <div class="step-tank">${tankSVG('#8C5A3C',.55)}<span class="pill"><em>2</em>Reserve</span><p>Pay for a crate and take a place in a batch of your chosen style.</p></div>
+      <div class="step-tank">${tankSVG('#C9A25B',.8)}<span class="pill"><em>3</em>Batch fills</span><p>At 40 crates the brewery buys ingredients and brews.</p></div>
+      <div class="step-tank">${tankSVG('#3A2A22',1)}<span class="pill"><em>4</em>Delivery</span><p>Your crate arrives with your own label on every bottle or can.</p></div>
+    </div></section>`;
+}
+function slots(){
+  main.innerHTML=`<div class="page-head"><h2 class="big">Book a slot</h2>
+   <p class="lead">Each slot is a batch of one beer style. Join one and your own label goes on your crate. A batch brews when it reaches 40 crates, and is refunded if it doesn’t fill by the deadline.</p></div>
+   <div class="slot-grid">${STYLES.map(st=>{const sel=S.style===st.id;return `<article class="slot ${sel?'sel':''}"><h3>${st.name}</h3><p class="note">${st.note}</p>
+     <dl><dt>Brew day</dt><dd>${st.brew}</dd><dt>Fills by</dt><dd>${st.by}</dd><dt>Strength</dt><dd>${st.abv.toFixed(1)}% vol</dd></dl>
+     ${crates(st.filled,0)}<div class="meta" style="display:flex;justify-content:space-between;font-size:14px"><span>${st.filled} of 40 crates</span><span class="togo">${40-st.filled} to go</span></div>
+     <button class="btn ${sel?'':'ghost'}" data-pick="${st.id}" style="margin-top:14px">${sel?'Selected – design it':'Join this batch'}</button></article>`}).join('')}</div>`;
+  main.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.style=b.dataset.pick;S.step=1;toast(sty(S.style).name+' batch selected. Next: design your label.');location.hash='studio';});
+}
+function studio(){
+  main.innerHTML=`<section class="studio"><div><ol class="steps" id="steps"></ol><div class="panel" id="panel"></div></div>
+   <aside class="aside"><div class="stage" id="stage"></div>
+    <div class="stage-tools"><div class="seg" role="group" aria-label="Preview format"><button data-f="can">Can</button><button data-f="bottle">Bottle</button></div><span style="font-size:14px;color:var(--muted)">Drag to rotate</span></div></aside></section>`;
+  main.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{S.format=b.dataset.f;preview();});
+  V=mount3D($('#stage'),()=>S,null);
+  steps();panel();preview();
+}
+const STEPNAMES=['Beer','Label','Crate','Reserve'];
+function steps(){
+  $('#steps').innerHTML=STEPNAMES.map((n,i)=>`<li><button data-s="${i}" ${S.step===i?'aria-current="step"':''}>${i+1}. ${n}</button></li>`).join('');
+  $('#steps').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.step=+b.dataset.s;steps();panel();});
+}
+function preview(){
+  if(V)V.update();else $('#stage').innerHTML=S.format==='can'?canSVG(S):bottleSVG(S);
+  document.querySelectorAll('[data-f]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===S.format));
+}
+function navRow(){
+  return `<div class="nav-row"><button class="btn ghost" id="back" ${S.step===0?'disabled':''}>Back</button><button class="btn ember" id="next">${S.step===2?'Review & reserve':'Continue'}</button></div>`;
+}
+function bindNav(){
+  const b=$('#back'),n=$('#next');
+  if(b)b.onclick=()=>{S.step=Math.max(0,S.step-1);steps();panel();};
+  if(n)n.onclick=()=>{S.step=Math.min(3,S.step+1);steps();panel();window.scrollTo({top:0,behavior:'smooth'});};
+}
+function panel(){
+  const p=$('#panel');
+  if(S.step===0){
+    p.innerHTML=`<h2>Pick your beer</h2><p class="lead">The style decides which batch you join. Add a twist if you like. The brewer confirms the final recipe.</p>
+     <div class="opts">${STYLES.map(st=>`<button class="opt" data-st="${st.id}" aria-pressed="${S.style===st.id}"><b>${st.name}</b><small>${st.note}</small><span class="r">${st.filled}/40 crates<br>Brew ${st.brew}</span></button>`).join('')}</div>
+     <h3 style="margin:28px 0 0">Flavour twist</h3><div class="chips">${TWISTS.map(t=>`<button class="chip" data-tw="${t}" aria-pressed="${S.twist===t}">${t}</button>`).join('')}</div>${navRow()}`;
+    p.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{S.style=b.dataset.st;panel();preview();});
+    p.querySelectorAll('[data-tw]').forEach(b=>b.onclick=()=>{S.twist=b.dataset.tw;panel();});
+  }
+  if(S.step===1){
+    p.innerHTML=`<h2>Make it yours</h2><p class="lead">Name it, colour it and add a logo. The preview updates as you type.</p>
+     <label class="field"><span>Beer name</span><input type="text" id="nm" maxlength="22" value="${esc(S.name)}"></label>
+     <label class="field"><span>Tagline</span><input type="text" id="tg" maxlength="30" value="${esc(S.tagline)}"></label>
+     <div class="field"><span>Colour</span></div><div class="sw" id="sw">${Object.entries(PAL).map(([k,v])=>`<button data-p="${k}" style="background:${v.bg}" aria-label="${v.name}" aria-pressed="${S.palette===k}"></button>`).join('')}</div>
+     <div class="field"><span>Pattern</span></div><div class="chips" style="margin-top:0">${PATTERNS.map(([k,l])=>`<button class="chip" data-pt="${k}" aria-pressed="${S.pattern===k}">${l}</button>`).join('')}</div>
+     <div class="field"><span>Logo</span></div>
+     <div class="icons">${ICONKEYS.map(k=>`<button data-ic="${k}" aria-label="${k} icon" aria-pressed="${S.logo.kind==='icon'&&S.logo.key===k}"><svg viewBox="-22 -22 44 44">${icon(k,'currentColor','var(--card)')}</svg></button>`).join('')}</div>
+     <div class="row"><label class="btn ghost sm" style="cursor:pointer">Upload your logo<input type="file" id="up" accept="image/*" hidden></label>
+      <button class="btn ghost sm" id="gen">Generate a logo</button><button class="btn ghost sm" id="gen2">Generate full label art</button>${S.art?'<button class="btn ghost sm" id="clr">Remove label art</button>':''}</div>
+     <p class="api-note">“Generate a logo” makes a symbol for your beer style in your label colour. “Generate full label art” tiles a pattern behind the name.</p>${navRow()}`;
+    $('#nm').oninput=e=>{S.name=e.target.value;preview();};
+    $('#tg').oninput=e=>{S.tagline=e.target.value;preview();};
+    p.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.palette=b.dataset.p;panel();preview();});
+    p.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{S.pattern=b.dataset.pt;panel();preview();});
+    p.querySelectorAll('[data-ic]').forEach(b=>b.onclick=()=>{S.logo={kind:'icon',key:b.dataset.ic,data:null};panel();preview();});
+    $('#up').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>1500000){toast('That file is over 1.5 MB. Please pick a smaller image.');return;}
+      const r=new FileReader();r.onload=()=>{S.logo={kind:'upload',key:null,data:r.result};panel();preview();};r.readAsDataURL(f);};
+    $('#gen').onclick=()=>generate('logo',$('#gen'));
+    $('#gen2').onclick=()=>generate('label',$('#gen2'));
+    if($('#clr'))$('#clr').onclick=()=>{S.art=null;panel();preview();};
+  }
+  if(S.step===2){
+    const price=PRICE[S.format]*S.qty;
+    p.innerHTML=`<h2>Pick your crate</h2><p class="lead">One crate is enough to own a beer. Add more for friends.</p>
+     <div class="opts"><button class="opt" data-fm="can" aria-pressed="${S.format==='can'}"><b>Cans</b><small>${FORMATS.can}</small><span class="r">€${PRICE.can} per crate</span></button>
+     <button class="opt" data-fm="bottle" aria-pressed="${S.format==='bottle'}"><b>Bottles</b><small>${FORMATS.bottle}</small><span class="r">€${PRICE.bottle} per crate</span></button></div>
+     <div class="field" style="margin-top:28px"><span>Crates</span><div class="stepper"><button id="mi" aria-label="One fewer crate">–</button><output>${S.qty}</output><button id="pl" aria-label="One more crate">+</button></div></div>
+     <label class="check"><input type="checkbox" id="oh" ${S.open?'checked':''}><span><b>Join the brew day</b><br><small style="color:var(--muted)">Visit the brewery on ${sty(S.style).brew} and help with the mash. Optional and free.</small></span></label>
+     <p style="font-weight:700;font-size:22px;margin:0">Total €${price}</p>${navRow()}`;
+    p.querySelectorAll('[data-fm]').forEach(b=>b.onclick=()=>{S.format=b.dataset.fm;panel();preview();});
+    $('#mi').onclick=()=>{S.qty=Math.max(1,S.qty-1);panel();};
+    $('#pl').onclick=()=>{S.qty=Math.min(6,S.qty+1);panel();};
+    $('#oh').onchange=e=>{S.open=e.target.checked;};
+  }
+  if(S.step===3){
+    const st=sty(S.style),price=PRICE[S.format]*S.qty;
+    if(S.reserved){
+      p.innerHTML=`<div class="ok"><h2>You’re in.</h2><p class="lead" style="margin:0 auto">Your ${esc(S.name)} crate is reserved in the ${st.name} batch. We brew as soon as it reaches 40 crates.</p>
+       <div class="code">${S.reserved}</div>${crates(Math.min(40,st.filled+S.qty),0)}<p style="font-size:14px;color:var(--muted)">${Math.min(40,st.filled+S.qty)} of 40 crates reserved. Refunded in full if the batch isn’t full by ${st.by}.</p>
+       <button class="btn ghost" id="again">Design another beer</button></div>`;
+      $('#again').onclick=()=>{S.reserved=null;S.step=0;steps();panel();};
+      return;
+    }
+    p.innerHTML=`<h2>Reserve your crate</h2><p class="lead">Check your order. You’re charged now and refunded if the batch doesn’t fill.</p>
+     <div class="summary"><table>
+      <tr><td>Beer</td><td>${esc(S.name||'Your beer')}</td></tr>
+      <tr><td>Style</td><td>${st.name}${S.twist!=='None'?' with '+S.twist.toLowerCase():''}, ${st.abv.toFixed(1)}%</td></tr>
+      <tr><td>Batch</td><td>Brew ${st.brew}</td></tr>
+      <tr><td>Crate</td><td>${S.qty} × ${FORMATS[S.format]}</td></tr>
+      <tr><td>Brew day</td><td>${S.open?'You’re coming':'Not attending'}</td></tr>
+      <tr class="total"><td>Total</td><td>€${price}</td></tr></table>
+      ${crates(st.filled,S.qty)}<div style="font-size:14px;color:var(--muted)">Green squares are your crates.</div></div>
+     <p class="terms">If the batch has fewer than 40 crates by ${st.by}, we cancel it and refund every crate in full.</p>
+     <div class="nav-row"><button class="btn ghost" id="back">Back</button><button class="btn ember" id="pay">Pay €${price} and reserve</button></div>`;
+    $('#back').onclick=()=>{S.step=2;steps();panel();};
+    $('#pay').onclick=()=>{S.reserved='BA-'+Math.random().toString(36).slice(2,7).toUpperCase();panel();toast('Crate reserved.');};
+  }
+  bindNav();
+}
+
+/* ---------- generator API (server-side proxy, see functions/api/generate.js) ---------- */
+function toMask(src){
+  return new Promise((ok,no)=>{
+    const im=new Image();
+    im.onload=()=>{
+      const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
+      x.drawImage(im,0,0,512,512);
+      const d=x.getImageData(0,0,512,512),p=d.data;
+      for(let i=0;i<p.length;i+=4){
+        const l=(p[i]*.3+p[i+1]*.59+p[i+2]*.11)/255;
+        const a=Math.max(0,Math.min(1,(0.85-l)/0.6));
+        p[i]=p[i+1]=p[i+2]=0;p[i+3]=Math.round(a*255);
+      }
+      x.putImageData(d,0,0);ok(c.toDataURL('image/png'));
+    };
+    im.onerror=no;im.src=src;
+  });
+}
+async function generate(type,btn){
+  const old=btn.textContent;btn.disabled=true;btn.textContent='Generating…';
+  try{
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type,style:S.style,twist:S.twist,palette:S.palette})});
+    const d=await r.json().catch(()=>({}));
+    if(r.status===501||d.error==='not_configured')toast('Generator not connected yet. Upload an image or pick an icon.');
+    else if(!r.ok||!d.image)toast('Generation failed. Please try again.');
+    else{
+      if(type==='logo')S.logo={kind:'mask',key:null,data:await toMask(d.image)};else S.art=d.image;
+      panel();preview();toast(type==='logo'?'Logo added.':'Label art added.');
+    }
+  }catch(e){toast('Could not reach the generator. Check your connection.');}
+  btn.disabled=false;btn.textContent=old;
+}
+
+/* ---------- router ---------- */
+function route(){
+  if(V){V.dispose();V=null;}
+  const r=(location.hash||'#home').slice(1);
+  document.querySelectorAll('nav.main a.link').forEach(a=>a.removeAttribute('aria-current'));
+  const link=document.querySelector(`nav.main a[data-r="${r}"]`);if(link&&r!=='studio')link.setAttribute('aria-current','page');
+  if(r==='slots')slots();
+  else if(r==='studio')studio();
+  else{home();{const hc=$('#heroCan');V=mount3D(hc,()=>S,'can');if(!V)hc.innerHTML=canSVG(S);}if(r==='how')setTimeout(()=>$('#how-sec')&&$('#how-sec').scrollIntoView({behavior:'smooth'}),30);else window.scrollTo(0,0);}
+  if(r!=='how')window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+route();
+</script>
+</body>
+</html>
