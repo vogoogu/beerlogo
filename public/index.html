@@ -90,6 +90,21 @@ h2.big{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:cl
 .slot dt{color:var(--muted)}
 .slot dd{margin:0;font-weight:600}
 .slot .btn{margin-top:auto}
+.spots{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin:10px 0 4px}
+.spots button{aspect-ratio:1;border:1.5px solid var(--line);border-radius:5px;background:transparent;color:var(--ink);font:600 11px/1 var(--body,inherit);cursor:pointer;padding:0;transition:transform .12s}
+.spots button:hover:not([disabled]){transform:scale(1.12);border-color:var(--hop)}
+.spots button[disabled]{background:var(--ember);border-color:var(--ember);color:transparent;opacity:.85;cursor:not-allowed}
+.spots button.pick{background:var(--hop);border-color:var(--hop);color:#fff}
+.spots button.mine{background:var(--hop);border-color:var(--ink);color:#fff;cursor:default}
+.spot-legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin:2px 0 6px}
+.spot-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;border:1.5px solid var(--line)}
+.modal-bg{position:fixed;inset:0;background:rgba(20,12,8,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
+.modal{background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:20px;padding:28px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal h3{margin:0 0 6px;font-family:var(--display);font-weight:900;font-size:30px}
+.modal table{width:100%;margin:14px 0;border-collapse:collapse}
+.modal td{padding:6px 0;border-bottom:1px solid var(--line)}.modal td:last-child{text-align:right;font-weight:600}
+.modal .row2{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.modal .code{font-family:var(--display);font-weight:900;font-size:34px;letter-spacing:.08em;text-align:center;margin:10px 0}
 .togo{font-weight:700;color:var(--ember);font-size:14px}
 
 /* studio */
@@ -224,7 +239,7 @@ const ICONKEYS=['hop','wheat','star','peak','sun'];
 const PRICE={can:68,bottle:72};
 const FORMATS={can:'24 cans · 0.33 l',bottle:'20 bottles · 0.5 l'};
 const S={style:'ipa',twist:'Citrus peel',name:'Hopfenfuchs',tagline:'Gebraut für Freunde',palette:'ember',pattern:'stripes',
- logo:{kind:'icon',key:'hop',data:null},art:null,format:'can',qty:1,open:false,step:0,reserved:null};
+ desc:'',pick:{},booked:{},logo:{kind:'icon',key:'hop',data:null},art:null,format:'can',qty:1,open:false,step:0,reserved:null};
 const sty=id=>STYLES.find(x=>x.id===id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=s=>document.querySelector(s);
@@ -291,7 +306,7 @@ function canSVG(s){
    ${s.pattern==='stripes'||s.pattern==='dots'?`<path d="${print}" fill="url(#pt${u})"/>`:''}
    ${s.pattern==='band'?`<rect x="30" y="${y0-fs-6}" width="140" height="${fs*L.length+44}" fill="${P.acc}" opacity=".25"/>`:''}
    <text x="100" y="110" text-anchor="middle" font-size="10.5" font-weight="700" fill="${P.ink}" textLength="80" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
-   ${logoMark(s,100,152,28,P,u)}${nm}${tag}
+   ${logoMark(s,100,154,34,P,u)}${nm}${tag}
    <line x1="58" x2="142" y1="296" y2="296" stroke="${P.ink}" stroke-width="1.5"/>
    <text x="100" y="314" text-anchor="middle" font-size="15" font-weight="800" fill="${P.ink}" style="font-family:Archivo,sans-serif">${st.name}</text>
    <text x="100" y="326" text-anchor="middle" font-size="8.5" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.abv.toFixed(1)}% vol · 0.33 l</text>
@@ -322,7 +337,7 @@ function canSVGOld(s){
   <ellipse cx="100" cy="378" rx="60" ry="7" fill="#000" opacity=".12"/>
   <g clip-path="url(#cb${u})"><rect x="20" y="30" width="160" height="330" fill="${P.bg}"/>${patternFill(s,P,u,y0-fs-6,fs*L.length+44)}
    <text x="100" y="72" text-anchor="middle" font-size="11" font-weight="700" fill="${P.ink}" textLength="88" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
-   ${logoMark(s,100,122,30,P,u)}${nm}${tag}
+   ${logoMark(s,100,124,35,P,u)}${nm}${tag}
    <line x1="48" x2="152" y1="308" y2="308" stroke="${P.ink}" stroke-width="1.5"/>
    <text x="100" y="330" text-anchor="middle" font-size="15" font-weight="800" fill="${P.ink}" style="font-family:Archivo,sans-serif">${st.name}</text>
    <text x="100" y="345" text-anchor="middle" font-size="9" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.abv.toFixed(1)}% vol · 0.33 l</text>
@@ -363,7 +378,7 @@ function bottleSVG(s){
    ${s.pattern==='stripes'||s.pattern==='dots'?`<rect x="56" y="196" width="88" height="140" fill="url(#pt${u})"/>`:''}
    ${s.pattern==='band'?`<rect x="56" y="${y0-fs-4}" width="88" height="${fs*L.length+22}" fill="${P.acc}" opacity=".25"/>`:''}
    <text x="100" y="219" text-anchor="middle" font-size="6.5" font-weight="700" fill="${P.ink}" textLength="40" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
-   ${logoMark(s,100,245,15,P,u)}${nm}
+   ${logoMark(s,100,246,17,P,u)}${nm}
    <text x="100" y="309" text-anchor="middle" font-size="7" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.name} · ${st.abv.toFixed(1)}% · 0.5 l</text>
    <rect x="56" y="196" width="88" height="140" fill="url(#ls${u})"/>
   </g>
@@ -397,7 +412,7 @@ function bottleSVGOld(s){
    <g transform="translate(54 200) scale(.46 .32)"><g transform="translate(-54 -200)">${s.pattern==='stripes'||s.pattern==='dots'?`<rect x="0" y="0" width="200" height="900" fill="url(#pt${u})" transform="translate(0 600) scale(1 -1)"/>`:''}</g></g>
    ${s.pattern==='band'?`<rect x="54" y="${y0-fs-6}" width="92" height="${fs*L.length+30}" fill="${P.acc}" opacity=".25"/>`:''}
    <text x="100" y="218" text-anchor="middle" font-size="7" font-weight="700" fill="${P.ink}" textLength="46" lengthAdjust="spacing" style="font-family:Archivo,sans-serif">Brauatelier</text>
-   ${logoMark(s,100,242,16,P,u)}${nm}
+   ${logoMark(s,100,244,18,P,u)}${nm}
    <text x="100" y="318" text-anchor="middle" font-size="8" fill="${P.ink}" style="font-family:'Work Sans',sans-serif">${st.name} · ${st.abv.toFixed(1)}% · 0.5 l</text></g></svg>`;
 }
 function tankSVG(body,level){
@@ -444,11 +459,11 @@ function drawLabel(c,kind,s,cb){
   const L=nameLines(s.name).map(t=>t.toUpperCase());
   const lim=can?430:370,maxS=L.length>1?(can?118:90):(can?150:118);
   const nsz=Math.min(...L.map(t=>fit(t,maxS,sz=>F(900,sz),lim)));
-  const nameY=(can?.545:.52)*h,lineH=nsz*.98;
+  const nameY=(can?.575:.545)*h,lineH=nsz*.98;
   if(s.pattern==='band'){x.globalAlpha=.25;x.fillStyle=P.acc;x.fillRect(0,nameY-nsz*.95,w,lineH*L.length+(can?110:80));x.globalAlpha=1;}
   x.fillStyle=P.ink;x.font=F(700,can?46:38);ls(can?'12px':'9px');
   x.fillText('Brauatelier',cx,(can?.115:.105)*h);ls('0px');
-  const ly=(can?.29:.265)*h,lr=(can?.105:.1)*h;
+  const ly=(can?.295:.27)*h,lr=(can?.14:.135)*h;
   x.lineWidth=can?9:8;x.strokeStyle=P.ink;x.beginPath();x.arc(cx,ly,lr,0,7);x.stroke();
   const img=getImg(logoSrc(s,P),cb);
   if(img&&img.width){
@@ -590,14 +605,71 @@ function home(){
       <div class="step-tank">${tankSVG('#3A2A22',1)}<span class="pill"><em>4</em>Delivery</span><p>Your crate arrives with your own label on every bottle or can.</p></div>
     </div></section>`;
 }
-function slots(){
+/* ---------- slot booking (simulated) ---------- */
+function takenSpots(st){ // deterministic scatter so free spots are spread out
+  let seed=st.id.split('').reduce((a,c)=>a*31+c.charCodeAt(0),7),a=[...Array(40).keys()];
+  for(let i=39;i>0;i--){seed=(seed*1103515245+12345)&0x7fffffff;const j=seed%(i+1);[a[i],a[j]]=[a[j],a[i]];}
+  return new Set(a.slice(0,st.filled));
+}
+function spotGrid(st){
+  const taken=takenSpots(st),mine=S.booked[st.id],pick=S.pick[st.id];let h='';
+  for(let i=0;i<40;i++){
+    const n=i+1;
+    if(mine===n)h+=`<button class="mine" disabled aria-label="Spot ${n}, your spot">${n}</button>`;
+    else if(taken.has(i))h+=`<button disabled aria-label="Spot ${n}, taken">${n}</button>`;
+    else h+=`<button class="${pick===n?'pick':''}" data-spot="${n}" aria-pressed="${pick===n}" aria-label="Spot ${n}, free">${n}</button>`;
+  }
+  return `<div class="spots" data-st="${st.id}">${h}</div>
+   <div class="spot-legend"><span><i></i>Free</span><span><i style="background:var(--ember);border-color:var(--ember)"></i>Taken</span><span><i style="background:var(--hop);border-color:var(--hop)"></i>Yours</span></div>`;
+}
+function bookingModal(html){
+  closeModal();
+  const m=document.createElement('div');m.className='modal-bg';m.id='modal';
+  m.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">${html}</div>`;
+  m.onclick=e=>{if(e.target===m&&!m.dataset.busy)closeModal();};
+  document.body.appendChild(m);
+  const f=m.querySelector('button');if(f)f.focus();
+  return m;
+}
+function closeModal(){const m=$('#modal');if(m)m.remove();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=$('#modal');if(m&&!m.dataset.busy)closeModal();}});
+function confirmSpot(st){
+  const n=S.pick[st.id];
+  const m=bookingModal(`<h3 id="mt">Confirm your spot</h3><p style="margin:0;color:var(--muted)">We hold it for 15 minutes while you design your label.</p>
+    <table><tr><td>Batch</td><td>${st.name}</td></tr><tr><td>Spot</td><td>#${n} of 40</td></tr><tr><td>Brew day</td><td>${st.brew}</td></tr><tr><td>Fills by</td><td>${st.by}</td></tr></table>
+    <div class="row2"><button class="btn ghost" id="mc">Cancel</button><button class="btn ember" id="mok">Confirm spot #${n}</button></div>`);
+  $('#mc').onclick=closeModal;
+  $('#mok').onclick=()=>{
+    m.dataset.busy=1;$('#mok').disabled=true;$('#mc').disabled=true;$('#mok').textContent='Reserving…';
+    setTimeout(()=>{
+      const taken=takenSpots(st);
+      if(taken.has(n-1)){delete m.dataset.busy;closeModal();delete S.pick[st.id];slots(true);toast('Sorry, spot #'+n+' was just taken. Pick another one.');return;}
+      S.booked[st.id]=n;delete S.pick[st.id];S.style=st.id;
+      S.booking='BK-'+Math.random().toString(36).slice(2,7).toUpperCase();
+      delete m.dataset.busy;slots(true);
+      m.firstChild.innerHTML=`<h3 id="mt">Spot #${n} is yours ✓</h3><p style="margin:0;color:var(--muted)">${st.name} batch, brew day ${st.brew}. Held for 15 minutes. We also sent a confirmation to your email.</p>
+        <div class="code">${S.booking}</div>
+        <div class="row2"><button class="btn ghost" id="mx">Stay here</button><button class="btn ember" id="mgo">Design your label</button></div>`;
+      $('#mgo').focus();
+      $('#mx').onclick=()=>{closeModal();slots(true);};
+      $('#mgo').onclick=()=>{closeModal();S.step=1;location.hash='studio';};
+      toast('Spot #'+n+' booked.');
+    },900);
+  };
+}
+function slots(keep){
+  const y=window.scrollY;
   main.innerHTML=`<div class="page-head"><h2 class="big">Book a slot</h2>
-   <p class="lead">Each slot is a batch of one beer style. Join one and your own label goes on your crate. A batch brews when it reaches 40 crates, and is refunded if it doesn’t fill by the deadline.</p></div>
-   <div class="slot-grid">${STYLES.map(st=>{const sel=S.style===st.id;return `<article class="slot ${sel?'sel':''}"><h3>${st.name}</h3><p class="note">${st.note}</p>
+   <p class="lead">Each slot is a batch of one beer style. Pick a free spot in a batch and your own label goes on your crate. A batch brews when it reaches 40 crates, and is refunded if it doesn’t fill by the deadline.</p></div>
+   <div class="slot-grid">${STYLES.map(st=>{const mine=S.booked[st.id],pick=S.pick[st.id],filled=st.filled+(mine?1:0);return `<article class="slot ${S.style===st.id&&mine?'sel':''}"><h3>${st.name}</h3><p class="note">${st.note}</p>
      <dl><dt>Brew day</dt><dd>${st.brew}</dd><dt>Fills by</dt><dd>${st.by}</dd><dt>Strength</dt><dd>${st.abv.toFixed(1)}% vol</dd></dl>
-     ${crates(st.filled,0)}<div class="meta" style="display:flex;justify-content:space-between;font-size:14px"><span>${st.filled} of 40 crates</span><span class="togo">${40-st.filled} to go</span></div>
-     <button class="btn ${sel?'':'ghost'}" data-pick="${st.id}" style="margin-top:14px">${sel?'Selected – design it':'Join this batch'}</button></article>`}).join('')}</div>`;
-  main.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.style=b.dataset.pick;S.step=1;toast(sty(S.style).name+' batch selected. Next: design your label.');location.hash='studio';});
+     ${spotGrid(st)}<div class="meta" style="display:flex;justify-content:space-between;font-size:14px"><span>${filled} of 40 crates</span><span class="togo">${40-filled} to go</span></div>
+     ${mine?`<button class="btn" data-go="${st.id}" style="margin-top:14px">Spot #${mine} booked – design it</button>`
+       :`<button class="btn ${pick?'ember':'ghost'}" data-book="${st.id}" ${pick?'':'disabled'} style="margin-top:14px">${pick?'Reserve spot #'+pick:'Pick a free spot'}</button>`}</article>`}).join('')}</div>`;
+  main.querySelectorAll('[data-spot]').forEach(b=>b.onclick=()=>{const id=b.parentNode.dataset.st;S.pick[id]=+b.dataset.spot;slots(true);});
+  main.querySelectorAll('[data-book]').forEach(b=>b.onclick=()=>confirmSpot(sty(b.dataset.book)));
+  main.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{S.style=b.dataset.go;S.step=1;toast(sty(S.style).name+' batch selected. Next: design your label.');location.hash='studio';});
+  if(keep)window.scrollTo(0,y);
 }
 function studio(){
   main.innerHTML=`<section class="studio"><div><ol class="steps" id="steps"></ol><div class="panel" id="panel"></div></div>
@@ -639,13 +711,15 @@ function panel(){
      <label class="field"><span>Tagline</span><input type="text" id="tg" maxlength="30" value="${esc(S.tagline)}"></label>
      <div class="field"><span>Colour</span></div><div class="sw" id="sw">${Object.entries(PAL).map(([k,v])=>`<button data-p="${k}" style="background:${v.bg}" aria-label="${v.name}" aria-pressed="${S.palette===k}"></button>`).join('')}</div>
      <div class="field"><span>Pattern</span></div><div class="chips" style="margin-top:0">${PATTERNS.map(([k,l])=>`<button class="chip" data-pt="${k}" aria-pressed="${S.pattern===k}">${l}</button>`).join('')}</div>
+     <label class="field"><span>Describe your logo</span><input type="text" id="ds" maxlength="80" placeholder="e.g. a grumpy fox wearing a crown of hops" value="${esc(S.desc)}"></label>
      <div class="field"><span>Logo</span></div>
      <div class="icons">${ICONKEYS.map(k=>`<button data-ic="${k}" aria-label="${k} icon" aria-pressed="${S.logo.kind==='icon'&&S.logo.key===k}"><svg viewBox="-22 -22 44 44">${icon(k,'currentColor','var(--card)')}</svg></button>`).join('')}</div>
      <div class="row"><label class="btn ghost sm" style="cursor:pointer">Upload your logo<input type="file" id="up" accept="image/*" hidden></label>
       <button class="btn ghost sm" id="gen">Generate a logo</button><button class="btn ghost sm" id="gen2">Generate full label art</button>${S.art?'<button class="btn ghost sm" id="clr">Remove label art</button>':''}</div>
-     <p class="api-note">The generate buttons call /api/generate. Until the API key is set on the server, they report that the generator is not connected.</p>${navRow()}`;
+     <p class="api-note">Describe what you want (animal, object, mood), then press Generate. Leave it empty for a classic hop and barley emblem.</p>${navRow()}`;
     $('#nm').oninput=e=>{S.name=e.target.value;preview();};
     $('#tg').oninput=e=>{S.tagline=e.target.value;preview();};
+    $('#ds').oninput=e=>{S.desc=e.target.value;};
     p.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.palette=b.dataset.p;panel();preview();});
     p.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{S.pattern=b.dataset.pt;panel();preview();});
     p.querySelectorAll('[data-ic]').forEach(b=>b.onclick=()=>{S.logo={kind:'icon',key:b.dataset.ic,data:null};panel();preview();});
@@ -681,7 +755,7 @@ function panel(){
      <div class="summary"><table>
       <tr><td>Beer</td><td>${esc(S.name||'Your beer')}</td></tr>
       <tr><td>Style</td><td>${st.name}${S.twist!=='None'?' with '+S.twist.toLowerCase():''}, ${st.abv.toFixed(1)}%</td></tr>
-      <tr><td>Batch</td><td>Brew ${st.brew}</td></tr>
+      <tr><td>Batch</td><td>Brew ${st.brew}${S.booked[S.style]?', spot #'+S.booked[S.style]:''}</td></tr>
       <tr><td>Crate</td><td>${S.qty} × ${FORMATS[S.format]}</td></tr>
       <tr><td>Brew day</td><td>${S.open?'You’re coming':'Not attending'}</td></tr>
       <tr class="total"><td>Total</td><td>€${price}</td></tr></table>
@@ -699,7 +773,7 @@ async function generate(type,btn){
   const old=btn.textContent;btn.disabled=true;btn.textContent='Generating…';
   try{
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type,name:S.name,tagline:S.tagline,style:sty(S.style).name,twist:S.twist,palette:PAL[S.palette].name,format:S.format})});
+      body:JSON.stringify({type,name:S.name,tagline:S.tagline,style:sty(S.style).name,twist:S.twist,palette:PAL[S.palette].name,colors:[PAL[S.palette].bg,PAL[S.palette].ink,PAL[S.palette].acc],description:S.desc,format:S.format})});
     const d=await r.json().catch(()=>({}));
     if(r.status===501||d.error==='not_configured')toast('Generator not connected yet. Upload an image or pick an icon.');
     else if(!r.ok||!d.image)toast('Generation failed. Please try again.');
@@ -713,6 +787,7 @@ async function generate(type,btn){
 
 /* ---------- router ---------- */
 function route(){
+  closeModal();
   if(V){V.dispose();V=null;}
   const r=(location.hash||'#home').slice(1);
   document.querySelectorAll('nav.main a.link').forEach(a=>a.removeAttribute('aria-current'));

@@ -9,39 +9,52 @@ const json = (obj, status = 200) =>
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 
-// Edit these lists to tune the results. Only chosen options go into prompts, never free text.
-const MOTIFS = {
-  default: "a bold hop cone and barley ear",
+// Edit these lists to tune the results.
+// The user's description is sanitised (letters, numbers, basic punctuation, max 80 chars) and used as the subject.
+const STYLE_MOTIFS = {
+  helles: "a golden wheat ear and a foamy beer stein",
+  "pale ale": "a hop cone with a citrus slice",
+  ipa: "a big resinous hop cone with leaves",
+  weizen: "a wheat sheaf and a tall wheat beer glass",
+  dunkel: "a toasted malt grain and a dark beer mug",
 };
-const PATTERN_MOTIFS = "repeating flat geometric pattern of hops, barley and bubbles";
-const TWISTS = { "citrus peel": "citrus peel", elderflower: "elderflower", "smoked malt": "smoked malt", "cold coffee": "cold coffee beans" };
-const COLORS = {
-  warm: "warm amber, orange and cream",
-  cool: "cool teal, navy and white",
-  dark: "deep black, gold and copper",
-  fresh: "fresh green, yellow and cream",
+const TWISTS = { "citrus peel": "citrus peel", elderflower: "elderflower blossoms", "smoked malt": "wisps of smoke", "cold coffee": "coffee beans" };
+const COLOR_NAMES = {
+  ember: "fiery orange-red and cream",
+  "hop green": "deep green, gold and cream",
+  night: "dark brown, gold and cream",
+  gold: "golden yellow, dark brown and orange",
+  cream: "cream, dark brown and orange",
+  "alpine blue": "alpine blue, cream and amber",
 };
 
 const pick = (map, key, fallback) => map[String(key ?? "").toLowerCase().trim()] ?? fallback;
-const clean = (v, n) => String(v ?? "").replace(/[^\p{L}\p{N} \-']/gu, "").trim().slice(0, n);
+const clean = (v, n) => String(v ?? "").replace(/[^\p{L}\p{N} ,.\-']/gu, " ").replace(/\s+/g, " ").trim().slice(0, n);
+const hex = (v) => (/^#[0-9a-f]{6}$/i.test(String(v)) ? String(v).toUpperCase() : null);
 
 function buildPrompt(body) {
   const type = body.type === "label" ? "label" : "logo";
   const format = body.format === "bottle" ? "bottle" : "can";
+  const desc = clean(body.description, 80);
   const twist = pick(TWISTS, body.twist, "");
-  const twistPart = twist ? `, hinting at ${twist}` : "";
-  const colors = pick(COLORS, body.palette, "warm amber, orange and cream");
+  const motif = pick(STYLE_MOTIFS, body.style, "a hop cone and barley ear");
+  const names = pick(COLOR_NAMES, body.palette, "warm orange, cream and dark brown");
+  const hexes = Array.isArray(body.colors) ? body.colors.map(hex).filter(Boolean).slice(0, 3) : [];
+  const colors = hexes.length ? `${names} (${hexes.join(", ")})` : names;
+  const subject = desc || `${motif}${twist ? ` with ${twist}` : ""}`;
   if (type === "logo") {
     return (
-      `A simple, bold emblem logo for a craft beer, featuring ${MOTIFS.default}${twistPart}. ` +
-      `Flat vector style, thick clean shapes, maximum two colours from ${colors}, centred on a plain background. ` +
-      `No text, no letters, no watermark. Must stay readable when printed small on a ${format}.`
+      `Striking, characterful emblem illustration for a craft beer: ${subject}. ` +
+      `Bold flat vector badge art with confident thick outlines, dynamic composition, clever details and strong silhouette, ` +
+      `like a professional craft-brewery mascot. Limited palette of ${colors}. ` +
+      `The artwork is large and fills the whole square frame edge to edge, centred, solid background in one of the palette colours. ` +
+      `No text, no letters, no words, no watermark, no border. Still clear when printed small on a ${format}.`
     );
   }
   return (
-    `Wrap-around label artwork for a craft beer: ${PATTERN_MOTIFS}${twistPart}. ` +
-    `Flat graphic illustration, bold shapes, colours: ${colors}. ` +
-    `Leave the centre third clear and calm. No text, no logos, no watermark.`
+    `Wrap-around label artwork for a craft beer: ${subject}, as a rich repeating illustrated pattern of hops, barley and bubbles. ` +
+    `Flat graphic illustration, bold shapes, palette of ${colors}. ` +
+    `Leave the centre third calmer and simpler. No text, no letters, no logos, no watermark.`
   );
 }
 
@@ -53,10 +66,8 @@ async function generate(request, env) {
   } catch {
     return json({ error: "bad_request" }, 400);
   }
-  // style is only used as a hint and sanitised
-  body.style = clean(body.style, 30);
   try {
-    const res = await env.AI.run(MODEL, { prompt: buildPrompt(body), steps: 4 });
+    const res = await env.AI.run(MODEL, { prompt: buildPrompt(body), steps: 8 });
     if (!res || !res.image) return json({ error: "no_image" }, 502);
     return json({ image: `data:image/jpeg;base64,${res.image}` });
   } catch {
