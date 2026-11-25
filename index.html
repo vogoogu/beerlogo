@@ -469,11 +469,11 @@ function drawLabel(c,kind,s,cb){
   const img=getImg(logoSrc(s,P),cb);
   if(img&&img.width){
     x.save();x.beginPath();x.arc(cx,ly,circ?lr:lr-12,0,7);x.clip();
-    if(circ){const m=Math.min(img.width,img.height)/(s.logo.kind==='badge'?1.1:1);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,cx-lr,ly-lr,2*lr,2*lr);}
+    if(circ){const m=Math.min(img.width,img.height)/(s.logo.kind==='badge'?1.06:1);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,cx-lr,ly-lr,2*lr,2*lr);}
     else x.drawImage(img,cx-lr*.86,ly-lr*.86,lr*1.72,lr*1.72);
     x.restore();
   }
-  x.lineWidth=can?11:9;x.strokeStyle=P.ink;x.beginPath();x.arc(cx,ly,circ?lr-5:lr,0,7);x.stroke();
+  x.lineWidth=can?12:10;x.strokeStyle='#FFFFFF';x.beginPath();x.arc(cx,ly,circ?lr-5:lr,0,7);x.stroke();
   x.fillStyle=P.ink;x.font=F(900,nsz);
   L.forEach((t,i)=>x.fillText(t,cx,nameY+i*lineH));
   const nb=nameY+(L.length-1)*lineH,tg=s.tagline.trim();

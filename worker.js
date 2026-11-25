@@ -68,12 +68,13 @@ export function buildPrompt({ type, style, twist, palette, desc, name }) {
   if (type === "logo") {
     let motif = desc || MOTIFS[style] || MOTIFS.ipa;
     if (!desc && extra && !motif.includes(extra)) motif += ` and ${extra}`;
-    const called = name ? ` called "${name}"` : "";
+    const called = name ? `, for a craft beer called "${name}"` : "";
     return (
-      `A round circular badge logo for a craft beer${called} (${STYLE_NAMES[style] || "beer"} style), showing ${motif} in the centre. ` +
-      `The badge is a perfect circle that fills the whole image edge to edge, with a solid coloured background inside the circle and a bold border. ` +
-      `Bold thick shapes, three or four flat colours that go well with the label colours (${colors}), playful modern craft-beer illustration. ` +
-      `No text, no letters, no watermark.`
+      `A bold flat vector illustration for a craft beer logo, showing ${motif}. ` +
+      `The subject is centred and large, and a solid colourful background fills the entire square image edge to edge, ` +
+      `with no border, no frame and no white margin. ` +
+      `Bold thick shapes, three or four flat colours that go well with the label colours (${colors}), ` +
+      `playful modern craft-beer illustration style${called}. No text, no letters, no watermark.`
     );
   }
   let motif = desc || PATTERN_MOTIFS[style] || PATTERN_MOTIFS.ipa;
