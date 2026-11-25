@@ -125,7 +125,9 @@ h2.big{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:cl
 .sw{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
 .sw button{width:44px;height:44px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 2px var(--line);cursor:pointer}
 .sw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--line),0 0 0 6px var(--ember)}
-.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:12px}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-bottom:12px}
+.icons img{width:100%;height:100%;object-fit:contain}
+.icons .cust{background:#fff}
 .icons button{aspect-ratio:1;background:var(--card);border:2px solid var(--line);border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:8px}
 .icons button[aria-pressed="true"]{outline:4px solid var(--ember);outline-offset:-1px}
 .icons svg{width:100%;height:100%}
@@ -265,7 +267,7 @@ function nameLines(n){
 }
 function logoMark(s,cx,cy,r,P,u){
   let inner;
-  if((s.logo.kind==='upload'||s.logo.kind==='mask')&&s.logo.data){
+  if((s.logo.kind==='upload'||s.logo.kind==='color')&&s.logo.data){
     inner=`<clipPath id="lg${u}"><circle cx="${cx}" cy="${cy}" r="${r-3}"/></clipPath><image href="${s.logo.data}" x="${cx-r+3}" y="${cy-r+3}" width="${(r-3)*2}" height="${(r-3)*2}" preserveAspectRatio="xMidYMid slice" clip-path="url(#lg${u})"/>`;
   }else{
     inner=`<g transform="translate(${cx} ${cy}) scale(${r/24})">${icon(s.logo.key,P.ink,P.bg)}</g>`;
@@ -437,7 +439,7 @@ function getImg(src,cb){
   return null;
 }
 function logoSrc(s,P){
-  if((s.logo.kind==='upload'||s.logo.kind==='mask')&&s.logo.data)return s.logo.data;
+  if((s.logo.kind==='upload'||s.logo.kind==='color')&&s.logo.data)return s.logo.data;
   return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="-22 -22 44 44" width="264" height="264">'+icon(s.logo.key,P.ink,P.bg)+'</svg>');
 }
 function drawLabel(c,kind,s,cb){
@@ -457,26 +459,28 @@ function drawLabel(c,kind,s,cb){
   const L=nameLines(s.name).map(t=>t.toUpperCase());
   const lim=can?430:370,maxS=L.length>1?(can?118:90):(can?150:118);
   const nsz=Math.min(...L.map(t=>fit(t,maxS,sz=>F(900,sz),lim)));
-  const nameY=(can?.545:.52)*h,lineH=nsz*.98;
+  const nameY=(can?.60:.59)*h,lineH=nsz*.98;
   if(s.pattern==='band'){x.globalAlpha=.25;x.fillStyle=P.acc;x.fillRect(0,nameY-nsz*.95,w,lineH*L.length+(can?110:80));x.globalAlpha=1;}
   if(s.art){x.globalAlpha=.82;x.fillStyle=P.bg;x.fillRect(cx-260,h*.03,520,h*.94);x.globalAlpha=1;}
   x.fillStyle=P.ink;x.font=F(700,can?46:38);ls(can?'12px':'9px');
-  x.fillText('Brauatelier',cx,(can?.115:.105)*h);ls('0px');
-  const ly=(can?.29:.265)*h,lr=(can?.105:.1)*h;
-  x.lineWidth=can?9:8;x.strokeStyle=P.ink;x.beginPath();x.arc(cx,ly,lr,0,7);x.stroke();
+  x.fillText('Brauatelier',cx,(can?.095:.085)*h);ls('0px');
+  const ly=(can?.295:.30)*h,lr=(can?.15:.16)*h,col=s.logo.kind==='color';
+  if(!col){x.lineWidth=can?11:9;x.strokeStyle=P.ink;x.beginPath();x.arc(cx,ly,lr,0,7);x.stroke();}
   const img=getImg(logoSrc(s,P),cb);
   if(img&&img.width){
-    x.save();x.beginPath();x.arc(cx,ly,lr-10,0,7);x.clip();
-    if(s.logo.kind==='upload'){const m=Math.min(img.width,img.height);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,cx-lr+10,ly-lr+10,2*lr-20,2*lr-20);}
-    else if(s.logo.kind==='mask'){const tc=document.createElement('canvas');tc.width=tc.height=512;const tx=tc.getContext('2d');tx.drawImage(img,0,0,512,512);tx.globalCompositeOperation='source-in';tx.fillStyle=P.ink;tx.fillRect(0,0,512,512);x.drawImage(tc,cx-lr*.9,ly-lr*.9,lr*1.8,lr*1.8);}
-    else x.drawImage(img,cx-lr*.82,ly-lr*.82,lr*1.64,lr*1.64);
-    x.restore();
+    if(col){x.drawImage(img,cx-lr*1.1,ly-lr*1.1,lr*2.2,lr*2.2);}
+    else{
+      x.save();x.beginPath();x.arc(cx,ly,lr-12,0,7);x.clip();
+      if(s.logo.kind==='upload'){const m=Math.min(img.width,img.height);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,cx-lr+12,ly-lr+12,2*lr-24,2*lr-24);}
+      else x.drawImage(img,cx-lr*.86,ly-lr*.86,lr*1.72,lr*1.72);
+      x.restore();
+    }
   }
   x.fillStyle=P.ink;x.font=F(900,nsz);
   L.forEach((t,i)=>x.fillText(t,cx,nameY+i*lineH));
   const nb=nameY+(L.length-1)*lineH,tg=s.tagline.trim();
   if(tg){const ts=fit(tg,can?42:34,sz=>B(500,sz),lim);x.font=B(500,ts);x.fillText(tg,cx,nb+ts*1.7);}
-  const ry=(can?.775:.8)*h;
+  const ry=(can?.79:.83)*h;
   x.strokeStyle=P.ink;x.lineWidth=5;x.beginPath();x.moveTo(cx-(can?180:150),ry);x.lineTo(cx+(can?180:150),ry);x.stroke();
   x.font=F(800,can?70:52);x.fillText(st.name,cx,ry+(can?84:62));
   x.font=B(500,can?34:28);x.fillText(st.abv.toFixed(1)+'% vol · '+(can?'0.33 l':'0.5 l'),cx,ry+(can?136:104));
@@ -681,11 +685,11 @@ function panel(){
      <div class="field"><span>Colour</span></div><div class="sw" id="sw">${Object.entries(PAL).map(([k,v])=>`<button data-p="${k}" style="background:${v.bg}" aria-label="${v.name}" aria-pressed="${S.palette===k}"></button>`).join('')}</div>
      <div class="field"><span>Pattern</span></div><div class="chips" style="margin-top:0">${PATTERNS.map(([k,l])=>`<button class="chip" data-pt="${k}" aria-pressed="${S.pattern===k}">${l}</button>`).join('')}</div>
      <div class="field"><span>Logo</span></div>
-     <div class="icons">${ICONKEYS.map(k=>`<button data-ic="${k}" aria-label="${k} icon" aria-pressed="${S.logo.kind==='icon'&&S.logo.key===k}"><svg viewBox="-22 -22 44 44">${icon(k,'currentColor','var(--card)')}</svg></button>`).join('')}</div>
+     <div class="icons">${S.logo.data?`<button class="cust" aria-label="Your logo" aria-pressed="true"><img src="${S.logo.data}" alt="Your logo"></button>`:''}${ICONKEYS.map(k=>`<button data-ic="${k}" aria-label="${k} icon" aria-pressed="${S.logo.kind==='icon'&&S.logo.key===k}"><svg viewBox="-22 -22 44 44">${icon(k,'currentColor','var(--card)')}</svg></button>`).join('')}</div>
      <label class="field"><span>Describe your logo (optional)</span><input type="text" id="ld" maxlength="80" placeholder="e.g. a fox holding a hop cone" value="${esc(S.logoDesc)}"></label>
      <div class="row"><label class="btn ghost sm" style="cursor:pointer">Upload your logo<input type="file" id="up" accept="image/*" hidden></label>
       <button class="btn ghost sm" id="gen">Generate a logo</button><button class="btn ghost sm" id="gen2">Generate full label art</button>${S.art?'<button class="btn ghost sm" id="clr">Remove label art</button>':''}</div>
-     <p class="api-note">Describe what you want, then press Generate. “Generate a logo” makes a symbol in your label colour. “Generate full label art” tiles a pattern behind the name. Leave the description empty and we pick something that fits your beer style. English works best.</p>${navRow()}`;
+     <p class="api-note">Describe what you want, then press Generate. “Generate a logo” makes a colourful logo. “Generate full label art” tiles a pattern behind the name. Leave the description empty and we pick something that fits your beer style. English works best.</p>${navRow()}`;
     $('#nm').oninput=e=>{S.name=e.target.value;preview();};
     $('#tg').oninput=e=>{S.tagline=e.target.value;preview();};
     $('#bm').oninput=e=>{S.backMsg=e.target.value;preview();};
@@ -739,19 +743,35 @@ function panel(){
 }
 
 /* ---------- generator API (server-side proxy, see functions/api/generate.js) ---------- */
-function toMask(src){
+function cutout(src){
+  // Removes the plain white background but keeps the logo's own colours, then crops to the logo.
   return new Promise((ok,no)=>{
     const im=new Image();
     im.onload=()=>{
-      const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
-      x.drawImage(im,0,0,512,512);
-      const d=x.getImageData(0,0,512,512),p=d.data;
-      for(let i=0;i<p.length;i+=4){
-        const l=(p[i]*.3+p[i+1]*.59+p[i+2]*.11)/255;
-        const a=Math.max(0,Math.min(1,(0.85-l)/0.6));
-        p[i]=p[i+1]=p[i+2]=0;p[i+3]=Math.round(a*255);
+      const N=640,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');
+      x.fillStyle='#fff';x.fillRect(0,0,N,N);
+      const m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,N,N);
+      const d=x.getImageData(0,0,N,N),p=d.data,seen=new Uint8Array(N*N),q=[];
+      const near=i=>p[i*4]>228&&p[i*4+1]>228&&p[i*4+2]>228;
+      const push=k=>{if(!seen[k]&&near(k)){seen[k]=1;q.push(k);}};
+      for(let i=0;i<N;i++){push(i);push((N-1)*N+i);push(i*N);push(i*N+N-1);}
+      while(q.length){
+        const k=q.pop(),xx=k%N,yy=(k/N)|0;
+        if(xx>0)push(k-1);if(xx<N-1)push(k+1);if(yy>0)push(k-N);if(yy<N-1)push(k+N);
       }
-      x.putImageData(d,0,0);ok(c.toDataURL('image/png'));
+      for(let i=0;i<N*N;i++){
+        if(seen[i]){p[i*4+3]=0;continue;}
+        const xx=i%N,yy=(i/N)|0;
+        const edge=(xx>0&&seen[i-1])||(xx<N-1&&seen[i+1])||(yy>0&&seen[i-N])||(yy<N-1&&seen[i+N]);
+        if(edge){const wv=Math.min(p[i*4],p[i*4+1],p[i*4+2])/255;if(wv>.75)p[i*4+3]=Math.round(255*Math.max(0,1-(wv-.75)/.25));}
+      }
+      let x0=N,y0=N,x1=0,y1=0;
+      for(let yy=0;yy<N;yy++)for(let xx=0;xx<N;xx++)if(p[(yy*N+xx)*4+3]>20){if(xx<x0)x0=xx;if(xx>x1)x1=xx;if(yy<y0)y0=yy;if(yy>y1)y1=yy;}
+      if(x1<=x0||y1<=y0){no(new Error('empty'));return;}
+      x.putImageData(d,0,0);
+      const bw=x1-x0+1,bh=y1-y0+1,side=Math.round(Math.max(bw,bh)*1.04),o=document.createElement('canvas');o.width=o.height=side;
+      o.getContext('2d').drawImage(c,x0,y0,bw,bh,(side-bw)/2,(side-bh)/2,bw,bh);
+      ok(o.toDataURL('image/png'));
     };
     im.onerror=no;im.src=src;
   });
@@ -760,12 +780,12 @@ async function generate(type,btn){
   const old=btn.textContent;btn.disabled=true;btn.textContent='Generating…';
   try{
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type,style:S.style,twist:S.twist,palette:S.palette,desc:S.logoDesc})});
+      body:JSON.stringify({type,style:S.style,twist:S.twist,palette:S.palette,desc:S.logoDesc,name:S.name})});
     const d=await r.json().catch(()=>({}));
     if(r.status===501||d.error==='not_configured')toast('Generator not connected yet. Upload an image or pick an icon.');
     else if(!r.ok||!d.image)toast('Generation failed. Please try again.');
     else{
-      if(type==='logo')S.logo={kind:'mask',key:null,data:await toMask(d.image)};else S.art=d.image;
+      if(type==='logo')S.logo={kind:'color',key:null,data:await cutout(d.image)};else S.art=d.image;
       panel();preview();toast(type==='logo'?'Logo added.':'Label art added.');
     }
   }catch(e){toast('Could not reach the generator. Check your connection.');}

@@ -27,6 +27,8 @@ const PATTERN_MOTIFS = {
   weizen: "wheat ears and small flowers",
   dunkel: "crescent moons and malt grains",
 };
+// Display names per beer style.
+const STYLE_NAMES = { helles: "Helles", pale: "Pale Ale", ipa: "IPA", weizen: "Weizen", dunkel: "Dunkel" };
 // Optional extra element per flavour twist.
 const TWISTS = {
   "Citrus peel": "a citrus slice",
@@ -60,21 +62,24 @@ export function cleanDesc(v) {
     .slice(0, 80);
 }
 
-export function buildPrompt({ type, style, twist, palette, desc }) {
+export function buildPrompt({ type, style, twist, palette, desc, name }) {
   const extra = TWISTS[twist];
+  const colors = COLORS[palette] || COLORS.ember;
   if (type === "logo") {
     let motif = desc || MOTIFS[style] || MOTIFS.ipa;
     if (!desc && extra && !motif.includes(extra)) motif += ` and ${extra}`;
+    const called = name ? ` called "${name}"` : "";
     return (
-      `A flat vector emblem of ${motif}, bold simple shapes, single colour black on a solid white background, ` +
-      `symmetrical, centred with generous empty margin, minimalist brand mark, symbol only.`
+      `A colourful flat vector badge logo of ${motif}, for a craft beer${called} (${STYLE_NAMES[style] || "beer"} style). ` +
+      `Bold thick shapes, three or four flat colours that go well with the label colours (${colors}), playful modern craft-beer illustration, ` +
+      `centred on a solid pure white background with generous empty margin. Symbol only, no text, no letters, no watermark.`
     );
   }
   let motif = desc || PATTERN_MOTIFS[style] || PATTERN_MOTIFS.ipa;
   if (!desc && extra && !motif.includes(extra)) motif += ` and ${extra}`;
   return (
     `A seamless repeating pattern of ${motif}, flat graphic illustration, bold shapes, two colours, ` +
-    `${COLORS[palette] || COLORS.ember}, even density, wallpaper style.`
+    `${colors}, even density, wallpaper style.`
   );
 }
 
@@ -95,11 +100,12 @@ async function generate(request, env) {
     twist: String(body.twist || ""),
     palette: String(body.palette || ""),
     desc: cleanDesc(body.desc),
+    name: cleanDesc(body.name),
   });
 
   let res;
   try {
-    res = await env.AI.run(MODEL, { prompt, steps: type === "logo" ? 6 : 4 });
+    res = await env.AI.run(MODEL, { prompt, steps: type === "logo" ? 8 : 4 });
   } catch {
     return json({ error: "upstream_error" }, 502);
   }
