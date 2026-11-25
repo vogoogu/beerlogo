@@ -1,12 +1,13 @@
 # NOTE: `name` must match the project name shown in your Cloudflare dashboard.
 name = "brauatelier"
-main = "src/worker.js"
+main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# Serves the website (public/index.html etc.). /api/generate is handled by the Worker.
-[assets]
-directory = "./public"
-binding = "ASSETS"
+# Bundle index.html and three.min.txt into the Worker as text.
+[[rules]]
+type = "Text"
+globs = ["**/*.html", "**/*.txt"]
+fallthrough = true
 
 # Cloudflare Workers AI (FLUX image model). No API key needed.
 [ai]

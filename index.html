@@ -26,7 +26,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);f
 button,input{font:inherit;color:inherit}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--ember);outline-offset:3px}
-.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(16px,3vw,40px)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(16px,3vw,40px);overflow-x:clip}
 
 /* header */
 header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:2px solid var(--line)}
@@ -108,9 +108,20 @@ h2.big{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:cl
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 28px}
 .chip{border:2px solid var(--line);background:transparent;border-radius:999px;padding:6px 14px;min-height:40px;cursor:pointer;font-weight:500}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.opt.recipe .r{grid-row:1;grid-column:2}
+.rt{display:flex;flex-direction:column}
+.meters{grid-column:1/-1;display:flex;gap:6px 18px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--muted)}
+.dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.dots i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line);opacity:.4}
+.dots i.on{background:var(--ember);border-color:var(--ember);opacity:1}
+.group{margin:24px 0 0}
+.group p{margin:0;font-size:16px}
+.linkbtn{background:none;border:0;padding:0;font-weight:600;color:var(--ember);text-decoration:underline;cursor:pointer}
+.grpbox{margin-top:12px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:16px}
+.grpbox .field:last-of-type{margin-bottom:14px}
 .field{display:block;margin-bottom:20px}
 .field>span{display:block;font-weight:600;margin-bottom:6px}
-.field input[type=text]{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:18px}
+.field input[type=text],.field input[type=email]{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:18px}
 .sw{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
 .sw button{width:44px;height:44px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 2px var(--line);cursor:pointer}
 .sw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--line),0 0 0 6px var(--ember)}
@@ -157,6 +168,7 @@ footer{border-top:2px solid var(--line);padding:32px 0 48px;color:var(--muted);f
   .stage-stack,.studio{grid-template-columns:1fr}
   .stage-hero{grid-template-columns:1fr;margin-top:calc(var(--mega) * -0.8)}
   .hero-left,.hero-right{max-width:none;justify-self:stretch;padding-bottom:0}
+  .hero-can{width:92%;margin:0 auto}
   .hero-left{order:2}.hero-right{order:3}
   .facts{grid-template-columns:1fr}.facts div{border-right:0;border-bottom:2px solid var(--line)}.facts div:last-child{border-bottom:0}
   .process{grid-template-columns:1fr 1fr}.process::before{display:none}
@@ -166,6 +178,8 @@ footer{border-top:2px solid var(--line);padding:32px 0 48px;color:var(--muted);f
   nav.main a.link.hide-sm{display:none}
 }
 @media (max-width:520px){
+  .opt.recipe{grid-template-columns:1fr}
+  .opt.recipe .r{grid-row:auto;grid-column:1;text-align:left;margin-top:6px}
   .process{grid-template-columns:1fr}
   header.top{flex-wrap:wrap;gap:10px}
   .brand{font-size:19px}
@@ -204,11 +218,10 @@ footer{border-top:2px solid var(--line);padding:32px 0 48px;color:var(--muted);f
 <script>
 /* ---------- data ---------- */
 const STYLES=[
- {id:'helles',name:'Helles',abv:4.9,note:'Soft, bready and easy to drink',brew:'Sat 9 Jan',by:'4 Jan',filled:22},
- {id:'pale',name:'Pale Ale',abv:5.2,note:'Citrus hops over a light malt body',brew:'Sat 16 Jan',by:'11 Jan',filled:31},
- {id:'ipa',name:'IPA',abv:6.1,note:'Resinous, bitter and tropical',brew:'Sat 23 Jan',by:'18 Jan',filled:12},
- {id:'weizen',name:'Weizen',abv:5.3,note:'Banana, clove and soft wheat',brew:'Sat 30 Jan',by:'25 Jan',filled:6},
- {id:'dunkel',name:'Dunkel',abv:5.0,note:'Toasted bread, caramel and cocoa',brew:'Sat 6 Feb',by:'1 Feb',filled:3}
+ {id:'helles',name:'Helles',abv:4.9,note:'Soft, bready and easy to drink',taste:[1,2,1],brew:'Sat 9 Jan',by:'4 Jan',filled:22},
+ {id:'pale',name:'Pale Ale',abv:5.2,note:'Citrus hops over a light malt body',taste:[3,2,4],brew:'Sat 16 Jan',by:'11 Jan',filled:31},
+ {id:'ipa',name:'IPA',abv:6.1,note:'Resinous, bitter and tropical',taste:[5,3,4],brew:'Sat 23 Jan',by:'18 Jan',filled:12},
+ {id:'dunkel',name:'Dunkel',abv:5.0,note:'Toasted bread, caramel and cocoa',taste:[2,4,1],brew:'Sat 30 Jan',by:'25 Jan',filled:3}
 ];
 const TWISTS=['None','Citrus peel','Elderflower','Smoked malt','Cold coffee'];
 const PAL={
@@ -223,8 +236,8 @@ const PATTERNS=[['none','Plain'],['stripes','Stripes'],['dots','Dots'],['band','
 const ICONKEYS=['hop','wheat','star','peak','sun'];
 const PRICE={can:68,bottle:72};
 const FORMATS={can:'24 cans · 0.33 l',bottle:'20 bottles · 0.5 l'};
-const S={style:'ipa',twist:'Citrus peel',name:'Hopfenfuchs',tagline:'Gebraut für Freunde',palette:'ember',pattern:'stripes',
- logo:{kind:'icon',key:'hop',data:null},art:null,format:'can',qty:1,open:false,step:0,reserved:null};
+const S={style:'ipa',twist:'None',name:'Hopfenfuchs',tagline:'Gebraut für Freunde',palette:'ember',pattern:'stripes',
+ logo:{kind:'icon',key:'hop',data:null},art:null,format:'can',qty:1,open:false,step:0,reserved:null,grp:false};
 const sty=id=>STYLES.find(x=>x.id===id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=s=>document.querySelector(s);
@@ -629,11 +642,20 @@ function bindNav(){
 function panel(){
   const p=$('#panel');
   if(S.step===0){
-    p.innerHTML=`<h2>Pick your beer</h2><p class="lead">The style decides which batch you join. Add a twist if you like. The brewer confirms the final recipe.</p>
-     <div class="opts">${STYLES.map(st=>`<button class="opt" data-st="${st.id}" aria-pressed="${S.style===st.id}"><b>${st.name}</b><small>${st.note}</small><span class="r">${st.filled}/40 crates<br>Brew ${st.brew}</span></button>`).join('')}</div>
-     <h3 style="margin:28px 0 0">Flavour twist</h3><div class="chips">${TWISTS.map(t=>`<button class="chip" data-tw="${t}" aria-pressed="${S.twist===t}">${t}</button>`).join('')}</div>${navRow()}`;
+    const dots=n=>'<span class="dots" role="img" aria-label="'+n+' out of 5">'+[1,2,3,4,5].map(i=>'<i class="'+(i<=n?'on':'')+'"></i>').join('')+'</span>';
+    p.innerHTML=`<h2>Pick your beer</h2><p class="lead">Choose one of four house recipes. The brewery brews it as written, and your name and label go on your crate.</p>
+     <div class="opts">${STYLES.map(st=>`<button class="opt recipe" data-st="${st.id}" aria-pressed="${S.style===st.id}"><span class="rt"><b>${st.name}</b><small>${st.note}</small></span><span class="r">${st.abv.toFixed(1)}% vol<br>${st.filled}/40 crates · Brew ${st.brew}</span><span class="meters"><span>Bitter ${dots(st.taste[0])}</span><span>Body ${dots(st.taste[1])}</span><span>Fruity ${dots(st.taste[2])}</span></span></button>`).join('')}</div>
+     <div class="group"><p>Booking a full batch? <button class="linkbtn" id="grp" aria-expanded="${S.grp}">Design your own recipe.</button></p>
+     ${S.grp?`<div class="grpbox"><label class="field"><span>What do you have in mind?</span><input type="text" id="gtxt" maxlength="140" placeholder="e.g. a smoked porter for our team event"></label>
+      <label class="field"><span>Your email</span><input type="email" id="gem" maxlength="80" placeholder="you@example.com"></label>
+      <button class="btn ember sm" id="gsend">Send request</button></div>`:''}</div>${navRow()}`;
     p.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{S.style=b.dataset.st;panel();preview();});
-    p.querySelectorAll('[data-tw]').forEach(b=>b.onclick=()=>{S.twist=b.dataset.tw;panel();});
+    $('#grp').onclick=()=>{S.grp=!S.grp;panel();};
+    if($('#gsend'))$('#gsend').onclick=()=>{
+      const em=$('#gem').value.trim();
+      if(!/^\S+@\S+\.\S+$/.test(em)){toast('Please enter a valid email address.');return;}
+      S.grp=false;panel();toast('Thanks! We will get back to you about your recipe.');
+    };
   }
   if(S.step===1){
     p.innerHTML=`<h2>Make it yours</h2><p class="lead">Name it, colour it and add a logo. The preview updates as you type.</p>
