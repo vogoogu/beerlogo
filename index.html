@@ -129,7 +129,7 @@ h2.big{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:cl
 .icons button{aspect-ratio:1;background:var(--card);border:2px solid var(--line);border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:8px}
 .icons button[aria-pressed="true"]{outline:4px solid var(--ember);outline-offset:-1px}
 .icons svg{width:100%;height:100%}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
 .api-note{font-size:14px;color:var(--muted);margin:6px 0 24px}
 .stepper{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:999px;overflow:hidden}
 .stepper button{width:44px;height:44px;background:transparent;border:0;font-size:22px;cursor:pointer}
@@ -237,7 +237,7 @@ const ICONKEYS=['hop','wheat','star','peak','sun'];
 const PRICE={can:68,bottle:72};
 const FORMATS={can:'24 cans · 0.33 l',bottle:'20 bottles · 0.5 l'};
 const S={style:'ipa',twist:'None',name:'Hopfenfuchs',tagline:'Gebraut für Freunde',palette:'ember',pattern:'stripes',
- logo:{kind:'icon',key:'hop',data:null},art:null,format:'can',qty:1,open:false,step:0,reserved:null,grp:false};
+ logo:{kind:'icon',key:'hop',data:null},art:null,logoDesc:'',backMsg:'',format:'can',qty:1,open:false,step:0,reserved:null,grp:false};
 const sty=id=>STYLES.find(x=>x.id===id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=s=>document.querySelector(s);
@@ -442,7 +442,7 @@ function logoSrc(s,P){
 }
 function drawLabel(c,kind,s,cb){
   const P=PAL[s.palette],st=sty(s.style),can=kind==='can';
-  const w=2048,h=can?1180:750,cx=w/2;
+  const w=2048,h=can?1180:830,cx=w/2;
   c.width=w;c.height=h;
   const x=c.getContext('2d');
   const F=(wt,sz)=>wt+' '+sz+"px Archivo, Impact, 'Arial Narrow', sans-serif";
@@ -481,11 +481,27 @@ function drawLabel(c,kind,s,cb){
   x.font=F(800,can?70:52);x.fillText(st.name,cx,ry+(can?84:62));
   x.font=B(500,can?34:28);x.fillText(st.abv.toFixed(1)+'% vol · '+(can?'0.33 l':'0.5 l'),cx,ry+(can?136:104));
   const back=xc=>{
-    x.fillStyle=P.ink;x.font=F(900,can?110:90);x.fillText('Brauatelier',xc,.40*h);
-    x.font=B(500,can?40:34);
-    x.fillText('Brewed on demand in Austria',xc,.52*h);
-    x.fillText('Your beer. Your label.',xc,.60*h);
-    x.fillText(can?'0.33 l · 24 cans per crate':'0.5 l · 20 bottles per crate',xc,.70*h);
+    if(s.art){x.globalAlpha=.82;x.fillStyle=P.bg;x.fillRect(xc-300,h*.03,600,h*.94);x.globalAlpha=1;}
+    x.fillStyle=P.ink;x.strokeStyle=P.ink;x.textAlign='center';
+    // brand
+    x.font=F(700,can?40:32);ls(can?'10px':'8px');x.fillText('Brauatelier',xc,.16*h);ls('0px');
+    x.lineWidth=4;x.globalAlpha=.6;x.beginPath();x.moveTo(xc-60,.195*h);x.lineTo(xc+60,.195*h);x.stroke();x.globalAlpha=1;
+    // message: the customer's own, or a default
+    const msg=(s.backMsg||'').trim()||'Brewed on demand in Austria';
+    const msz=can?58:46,max=can?480:400;
+    x.font=F(800,msz);
+    const words=msg.split(/\s+/),lines=[];let cur='';
+    words.forEach(wd=>{const tr=cur?cur+' '+wd:wd;if(x.measureText(tr).width>max&&cur){lines.push(cur);cur=wd;}else cur=tr;});
+    if(cur)lines.push(cur);
+    lines.slice(0,3).forEach((l,i)=>x.fillText(l,xc,.34*h+i*msz*1.2));
+    // fine print
+    const fy=(can?.66:.62)*h,fg=can?58:50;
+    x.font=B(500,can?30:27);x.globalAlpha=.9;
+    [st.name+' · '+st.abv.toFixed(1)+'% vol · '+(can?'0.33 l':'0.5 l'),
+     'Brew day '+st.brew,
+     'Water, barley malt, hops, yeast',
+     'Contains gluten','Please enjoy responsibly'].forEach((l,i)=>x.fillText(l,xc,fy+i*fg));
+    x.globalAlpha=1;
   };
   back(0);back(w);
 }
@@ -530,7 +546,7 @@ function mount3D(el,getS,fixedKind){
   botG.add(new T.Mesh(lathe([[0,.12],[.55,.12],[.7,.12],[.78,.2],[.79,.3],[.79,2.55],[.77,2.85],[.69,3.2],[.52,3.55],[.34,3.85],[.25,4.1],[.22,4.35],[.22,4.6],[0,4.6]]),liquid));
   const gl=new T.Mesh(lathe([[0,.06],[.56,.06],[.7,0],[.8,.1],[.82,.3],[.82,2.55],[.8,2.85],[.72,3.2],[.55,3.55],[.37,3.85],[.28,4.1],[.25,4.35],[.25,4.95],[.28,5],[.32,5.07],[.32,5.18],[.27,5.22]]),glass);gl.renderOrder=2;botG.add(gl);
   const bMat=new T.MeshStandardMaterial({map:texs.bottle,roughness:.55,metalness:0,envMapIntensity:.5});
-  const lb=new T.Mesh(new T.CylinderGeometry(.827,.827,1.9,128,1,true),bMat);lb.position.y=1.5;lb.rotation.y=Math.PI;botG.add(lb);
+  const lb=new T.Mesh(new T.CylinderGeometry(.827,.827,2.1,128,1,true),bMat);lb.position.y=1.45;lb.rotation.y=Math.PI;botG.add(lb);
   const capMat=new T.MeshStandardMaterial({color:C(0xe8501f),metalness:.6,roughness:.35,flatShading:true,envMapIntensity:1.2});
   const cap=new T.Mesh(new T.CylinderGeometry(.33,.36,.16,28,1),capMat);cap.position.y=5.25;botG.add(cap);
   botG.position.y=-2.68;
@@ -661,18 +677,22 @@ function panel(){
     p.innerHTML=`<h2>Make it yours</h2><p class="lead">Name it, colour it and add a logo. The preview updates as you type.</p>
      <label class="field"><span>Beer name</span><input type="text" id="nm" maxlength="22" value="${esc(S.name)}"></label>
      <label class="field"><span>Tagline</span><input type="text" id="tg" maxlength="30" value="${esc(S.tagline)}"></label>
+     <label class="field"><span>Message on the back (optional)</span><input type="text" id="bm" maxlength="60" placeholder="e.g. For Anna’s 40th. Cheers!" value="${esc(S.backMsg)}"></label>
      <div class="field"><span>Colour</span></div><div class="sw" id="sw">${Object.entries(PAL).map(([k,v])=>`<button data-p="${k}" style="background:${v.bg}" aria-label="${v.name}" aria-pressed="${S.palette===k}"></button>`).join('')}</div>
      <div class="field"><span>Pattern</span></div><div class="chips" style="margin-top:0">${PATTERNS.map(([k,l])=>`<button class="chip" data-pt="${k}" aria-pressed="${S.pattern===k}">${l}</button>`).join('')}</div>
      <div class="field"><span>Logo</span></div>
      <div class="icons">${ICONKEYS.map(k=>`<button data-ic="${k}" aria-label="${k} icon" aria-pressed="${S.logo.kind==='icon'&&S.logo.key===k}"><svg viewBox="-22 -22 44 44">${icon(k,'currentColor','var(--card)')}</svg></button>`).join('')}</div>
+     <label class="field"><span>Describe your logo (optional)</span><input type="text" id="ld" maxlength="80" placeholder="e.g. a fox holding a hop cone" value="${esc(S.logoDesc)}"></label>
      <div class="row"><label class="btn ghost sm" style="cursor:pointer">Upload your logo<input type="file" id="up" accept="image/*" hidden></label>
       <button class="btn ghost sm" id="gen">Generate a logo</button><button class="btn ghost sm" id="gen2">Generate full label art</button>${S.art?'<button class="btn ghost sm" id="clr">Remove label art</button>':''}</div>
-     <p class="api-note">“Generate a logo” makes a symbol for your beer style in your label colour. “Generate full label art” tiles a pattern behind the name.</p>${navRow()}`;
+     <p class="api-note">Describe what you want, then press Generate. “Generate a logo” makes a symbol in your label colour. “Generate full label art” tiles a pattern behind the name. Leave the description empty and we pick something that fits your beer style. English works best.</p>${navRow()}`;
     $('#nm').oninput=e=>{S.name=e.target.value;preview();};
     $('#tg').oninput=e=>{S.tagline=e.target.value;preview();};
+    $('#bm').oninput=e=>{S.backMsg=e.target.value;preview();};
     p.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{S.palette=b.dataset.p;panel();preview();});
     p.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{S.pattern=b.dataset.pt;panel();preview();});
     p.querySelectorAll('[data-ic]').forEach(b=>b.onclick=()=>{S.logo={kind:'icon',key:b.dataset.ic,data:null};panel();preview();});
+    $('#ld').oninput=e=>{S.logoDesc=e.target.value;};
     $('#up').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>1500000){toast('That file is over 1.5 MB. Please pick a smaller image.');return;}
       const r=new FileReader();r.onload=()=>{S.logo={kind:'upload',key:null,data:r.result};panel();preview();};r.readAsDataURL(f);};
     $('#gen').onclick=()=>generate('logo',$('#gen'));
@@ -740,7 +760,7 @@ async function generate(type,btn){
   const old=btn.textContent;btn.disabled=true;btn.textContent='Generating…';
   try{
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type,style:S.style,twist:S.twist,palette:S.palette})});
+      body:JSON.stringify({type,style:S.style,twist:S.twist,palette:S.palette,desc:S.logoDesc})});
     const d=await r.json().catch(()=>({}));
     if(r.status===501||d.error==='not_configured')toast('Generator not connected yet. Upload an image or pick an icon.');
     else if(!r.ok||!d.image)toast('Generation failed. Please try again.');

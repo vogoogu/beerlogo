@@ -50,18 +50,28 @@ const json = (obj, status = 200) =>
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 
-export function buildPrompt({ type, style, twist, palette }) {
+// Customer description: letters, digits, spaces and basic punctuation only, max 80 characters.
+export function cleanDesc(v) {
+  return String(v || "")
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N} ,.'\u2019-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
+}
+
+export function buildPrompt({ type, style, twist, palette, desc }) {
   const extra = TWISTS[twist];
   if (type === "logo") {
-    let motif = MOTIFS[style] || MOTIFS.ipa;
-    if (extra && !motif.includes(extra)) motif += ` and ${extra}`;
+    let motif = desc || MOTIFS[style] || MOTIFS.ipa;
+    if (!desc && extra && !motif.includes(extra)) motif += ` and ${extra}`;
     return (
       `A flat vector emblem of ${motif}, bold simple shapes, single colour black on a solid white background, ` +
       `symmetrical, centred with generous empty margin, minimalist brand mark, symbol only.`
     );
   }
-  let motif = PATTERN_MOTIFS[style] || PATTERN_MOTIFS.ipa;
-  if (extra && !motif.includes(extra)) motif += ` and ${extra}`;
+  let motif = desc || PATTERN_MOTIFS[style] || PATTERN_MOTIFS.ipa;
+  if (!desc && extra && !motif.includes(extra)) motif += ` and ${extra}`;
   return (
     `A seamless repeating pattern of ${motif}, flat graphic illustration, bold shapes, two colours, ` +
     `${COLORS[palette] || COLORS.ember}, even density, wallpaper style.`
@@ -84,6 +94,7 @@ async function generate(request, env) {
     style: String(body.style || ""),
     twist: String(body.twist || ""),
     palette: String(body.palette || ""),
+    desc: cleanDesc(body.desc),
   });
 
   let res;
